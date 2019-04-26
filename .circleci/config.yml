@@ -78,11 +78,15 @@ jobs:
           args: "--junitxml=test-reports/junit.xml"
       # Upload code coverage
       - codecov/upload
-      # Save test results
+      # Save test/coverage results
       - store_test_results:
           path: test-reports
       - store_artifacts:
           path: test-reports
+      - store_artifacts:
+          path: coverage.xml
+      - store_artifacts:
+          path: htmlcov
 
   test38:
     docker:
@@ -99,11 +103,15 @@ jobs:
           args: "--junitxml=test-reports/junit.xml"
       # Upload code coverage
       - codecov/upload
-      # Save test results
+      # Save test/coverage results
       - store_test_results:
           path: test-reports
       - store_artifacts:
           path: test-reports
+      - store_artifacts:
+          path: coverage.xml
+      - store_artifacts:
+          path: htmlcov
 
   lint:
     docker:
@@ -123,8 +131,12 @@ workflows:
   build-and-test:
     jobs:
       - build
-      - test37
-      - test38
+      - test37:
+          requires:
+            - build
+      - test38:
+          requires:
+            - build
       - lint:
           requires:
             - test37
