@@ -1,18 +1,14 @@
-# Python CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-python/ for more details
-#
-version: 2
-jobs:
-  build:
-    docker:
-      - image: circleci/python:3.7.2
+# Test Python code
 
-    working_directory: ~/repo
+version: 2.1
 
+orbs:
+  codecov: codecov/codecov@1.0.4
+
+commands:
+  setuppy:
+    description: "Setup a working Python+Tox env"
     steps:
-      - checkout
-
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -33,20 +29,91 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "tox.ini" }}
 
+  tox:
+    description: "Run this Tox environment"
+    parameters:
+      env:
+        type: string
+        default: "py37"
+      args:
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: run Tox << parameters.env >>
+          command: |
+            . venv/bin/activate
+            tox -e << parameters.env >> -- << parameters.args >>
+
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - run: echo "Pass"
+
+  test37:
+    docker:
+      - image: circleci/python:3.7
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - setuppy
       # run tests
-      - run:
-          name: run tests
-          command: |
-            . venv/bin/activate
-            tox -e py37
-
-        # run linters
-      - run:
-          name: run linters
-          command: |
-            . venv/bin/activate
-            tox -e linters
-
+      - tox:
+          env: py37
+          args: "--junitxml=test-reports/junit.xml"
+      # Upload code coverage
+      - codecov/upload
+      # Save test results
+      - store_test_results:
+          path: test-reports
       - store_artifacts:
           path: test-reports
-          destination: test-reports
+
+  test38:
+    docker:
+      - image: circleci/python:3.8-rc
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - setuppy
+      # run tests
+      - tox:
+          env: py38
+          args: "--junitxml=test-reports/junit.xml"
+      # Upload code coverage
+      - codecov/upload
+      # Save test results
+      - store_test_results:
+          path: test-reports
+      - store_artifacts:
+          path: test-reports
+
+  lint:
+    docker:
+      - image: circleci/python:3.7
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - setuppy
+        # run linters
+      - tox:
+          env: linters
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
+      - test37
+      - test38
+      - lint:
+          requires:
+            - test37
