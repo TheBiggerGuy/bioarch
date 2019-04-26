@@ -1,6 +1,9 @@
 # Test and CI
 test-reports/
 
+# Local testing
+py37_env/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

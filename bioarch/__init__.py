@@ -17,7 +17,7 @@ if sys.version_info < (3, 7):
     sys.exit(-1)
 
 
-__title__ = 'bioarc'
+__title__ = 'bioarch'
 __version__ = '0.0.1'
 __author__ = 'Guy Taylor'
 

@@ -1,6 +1,6 @@
 [run]
 branch = True
 source =
-    bioarc
+    bioarch
 omit =
     *_test.py
