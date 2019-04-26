@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from codecs import open  # To use a consistent encoding
-from os import getenv, path, system
+from os import getenv, path
 import re
 import sys
 
@@ -69,11 +69,6 @@ class PyTest(TestCommand):
         import pytest  # import here, cause outside the eggs aren't loaded
         errno = pytest.main(shlex.split(self.pytest_args))
         sys.exit(errno)
-
-
-if sys.argv[-1] == 'publish':
-    system('python setup.py sdist upload')
-    sys.exit()
 
 
 setup(

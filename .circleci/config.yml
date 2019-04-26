@@ -22,7 +22,8 @@ commands:
             python3 -m venv venv
             . venv/bin/activate
             pip install --upgrade pip
-            pip install tox
+            pip install --upgrade setuptools wheel twine
+            pip install --upgrade tox
 
       - save_cache:
           paths:
@@ -126,6 +127,28 @@ jobs:
       - tox:
           env: linters
 
+  deploy:
+    docker:
+      - image: circleci/python:3.7
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - setuppy
+      # - run:
+      #     name: init .pypirc
+      #     command: |
+      #       echo -e "[pypi]" >> ~/.pypirc
+      #       echo -e "username = ${PYPI_USERNAME}" >> ~/.pypirc
+      #       echo -e "password = ${PYPI_PASSWORD}" >> ~/.pypirc
+      - run:
+          name: Package and Upload
+          command: |
+            . venv/bin/activate
+            python setup.py sdist bdist_wheel
+            twine upload dist/*
+
 workflows:
   version: 2
   build-and-test:
@@ -140,3 +163,11 @@ workflows:
       - lint:
           requires:
             - test37
+      - deploy:
+          requires:
+            - lint
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+            branches:
+              only: master
