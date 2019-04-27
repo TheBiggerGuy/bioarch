@@ -10,16 +10,21 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../'))
+
+from bioarch import __version__ as bioarch_version
+from bioarch import __author__ as bioarch_author
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'BioArch'
 copyright = '2019, Guy Taylor'
-author = 'Guy Taylor'
+author = bioarch_author
+version = bioarch_version.split('-')[0]
+release = bioarch_version
 
 
 # -- General configuration ---------------------------------------------------
@@ -28,7 +33,12 @@ author = 'Guy Taylor'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'recommonmark'
+    'sphinx.ext.autodoc',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.viewcode',
+    'recommonmark',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -39,6 +49,9 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+# https://github.com/rtfd/readthedocs.org/issues/2569#issuecomment-485117471
+master_doc = 'index'
+
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -46,6 +59,10 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'alabaster'
+html_theme_options = {
+    "github_user": "TheBiggerGuy",
+    "github_repo": "bioarch",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
