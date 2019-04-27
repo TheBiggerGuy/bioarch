@@ -78,7 +78,7 @@ setup(
     long_description=meta_data.long_description,
     author=meta_data.author,
     author_email='thebigguy.co.uk@gmail.com',
-    url='https://github.com/TheBiggerGuy/pybioarch',
+    url='https://github.com/TheBiggerGuy/bioarch',
     packages=find_packages(exclude=['docs', 'tests']),
     package_data={'': ['LICENSE', 'README.md']},
     zip_safe=False,
