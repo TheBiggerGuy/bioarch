@@ -4,7 +4,7 @@
 import sys
 
 
-from .age import EstimatedAge
+from .age import AgeCategory, EstimatedAge
 from .individual import AgeSexStature, BurialInfo, Individual, LongBoneMeasurement, OsteologicalSex
 from .left_right import LeftRight
 from .mouth import Mouth, Tooth
@@ -21,5 +21,5 @@ __title__ = 'bioarch'
 __version__ = '0.0.1'
 __author__ = 'Guy Taylor'
 
-__all__ = ['EstimatedAge'] + ['AgeSexStature', 'BurialInfo', 'Individual', 'LongBoneMeasurement', 'OsteologicalSex'] + \
+__all__ = ['AgeCategory', 'EstimatedAge'] + ['AgeSexStature', 'BurialInfo', 'Individual', 'LongBoneMeasurement', 'OsteologicalSex'] + \
           ['EnthesialMarker', 'OccupationalMarkers'] + ['LeftRight'] + ['Mouth', 'Tooth'] + ['Sex']
