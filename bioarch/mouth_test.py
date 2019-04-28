@@ -21,6 +21,13 @@ class ToothTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             Tooth('Z', '2', 'NA', '0', '1')
 
+        # if Tooth='NA' then calculus=eh=cavities='NA'
+        for i in range(1, 4):
+            with self.assertRaises(ValueError):
+                args = ['NA', 'NA', 'NA', 'NA', '1']
+                args[i] = '1'
+                Tooth(*args)
+
     def test_eq(self):
         self.assertEqual(Tooth('A', '2', 'NA', '0', '1'), Tooth('A', '2', 'NA', '0', '1'))
         for i in range(0, 5):
@@ -35,7 +42,7 @@ class ToothTest(unittest.TestCase):
         self.assertEqual(series.to_json(), '{"tooth_0_tooth":"A","tooth_0_tooth_val":2,"tooth_0_calculus":"2","tooth_0_calculus_val":2,"tooth_0_eh":"NA","tooth_0_eh_val":null,"tooth_0_cavities":"0","tooth_0_cavities_val":false,"tooth_0_abcess":"1","tooth_0_abcess_val":true}')
 
         for i, tooth in enumerate(('NA', '0', '1', 'A', 'B1', 'B2', 'C', 'D', 'E', 'F', 'G', 'H', 'I')):
-            series = Tooth(tooth, '2', 'NA', '0', '1').to_pd_series()
+            series = Tooth(tooth, 'NA', 'NA', 'NA', 'NA').to_pd_series()
             if i == 0:
                 self.assertEqual(series['tooth_val'], None)
             else:
