@@ -31,12 +31,13 @@ class Tooth(object):
         check(eh).is_in(VALID_EH).or_raise(ValueError)
         check(cavities).is_in(VALID_CAVITIES).or_raise(ValueError)
         check(abcess).is_in(VALID_ABCESS).or_raise(ValueError)
+        # If there is no tooth then there can be no calculus, eh or cavities.
+        # Note there can be abcess
         if tooth == 'NA':
             try:
                 check(calculus).equals('NA').or_raise(ValueError)
                 check(eh).equals('NA').or_raise(ValueError)
                 check(cavities).equals('NA').or_raise(ValueError)
-                check(abcess).equals('NA').or_raise(ValueError)
             except ValueError:
                 logger.exception('Values for calculus/eh/cavities/abcess when tooth was missing')
 
