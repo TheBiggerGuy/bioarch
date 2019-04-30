@@ -159,9 +159,9 @@ workflows:
           requires:
             - test37
       - deploy:
+          filters:
+            tags:
+              only: /^v.*/
           requires:
             - test38
             - lint
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
