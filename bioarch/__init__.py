@@ -6,6 +6,7 @@ import sys
 
 from .age import AgeCategory, EstimatedAge
 from .individual import AgeSexStature, BurialInfo, Individual, LongBoneMeasurement, OsteologicalSex
+from .joints import JointCondition, Joints
 from .left_right import LeftRight
 from .mouth import Mouth, Tooth
 from .occupational_markers import EnthesialMarker, OccupationalMarkers
@@ -22,4 +23,4 @@ __version__ = '0.0.8'
 __author__ = 'Guy Taylor'
 
 __all__ = ['AgeCategory', 'EstimatedAge'] + ['AgeSexStature', 'BurialInfo', 'Individual', 'LongBoneMeasurement', 'OsteologicalSex'] + \
-          ['EnthesialMarker', 'OccupationalMarkers'] + ['LeftRight'] + ['Mouth', 'Tooth'] + ['Sex']
+          ['JointCondition', 'Joints'] + ['EnthesialMarker', 'OccupationalMarkers'] + ['LeftRight'] + ['Mouth', 'Tooth'] + ['Sex']
