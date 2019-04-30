@@ -140,6 +140,7 @@ jobs:
           name: Package and Upload
           command: |
             . venv/bin/activate
+            python setup.py verify
             python setup.py sdist bdist_wheel
             twine check dist/*
             twine upload dist/*
