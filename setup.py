@@ -76,6 +76,7 @@ setup(
     version=meta_data.version,
     description='Python bioarchaeology',
     long_description=meta_data.long_description,
+    long_description_content_type='text/markdown',
     author=meta_data.author,
     author_email='thebigguy.co.uk@gmail.com',
     url='https://github.com/TheBiggerGuy/bioarch',
