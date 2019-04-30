@@ -54,7 +54,7 @@ class VerifyVersionCommand(install):
         if circleci_tag is None:
             sys.exit(f'Faied to find "CIRCLE_TAG" env')
 
-        if ('v' + circleci_tag) != meta_data.version:
+        if circleci_tag != ('v' + meta_data.version):
             info = f'CircleCI Git tag "{circleci_tag}" does not match the version of this app "{meta_data.version}"'
             sys.exit(info)
 
