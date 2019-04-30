@@ -159,9 +159,11 @@ workflows:
           requires:
             - test37
       - deploy:
-          filters:
-            tags:
-              only: /^v.*/
           requires:
             - test38
             - lint
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
