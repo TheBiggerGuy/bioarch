@@ -3,22 +3,35 @@
 
 import inspect
 from statistics import mean
+from typing import Any, cast, Generic, List, Optional, TypeVar
 
 
-def best_effort_avg(left, right):
+T = TypeVar('T')
+
+
+def best_effort_avg(left: Optional[T], right: Optional[T]) -> Optional[T]:
     if left is None:
         return right
     if right is None:
         return left
 
     if isinstance(left, int):
-        return int(mean((left, right)))
+        if not isinstance(right, int):
+            raise TypeError
+        return cast(T, int(mean((left, right))))
 
     if isinstance(left, float):
-        return mean((left, right))
+        if not isinstance(right, float):
+            raise TypeError
+        return cast(T, mean((left, right)))
 
-    if hasattr(left, 'avg') and inspect.isfunction(left.avg):
-        arg_spec = inspect.getfullargspec(left.avg)
+    if right.__class__ != left.__class__:
+        raise TypeError
+    type_class = left.__class__
+
+    if hasattr(type_class, 'avg') and inspect.isfunction(getattr(type_class, 'avg')):
+        avg_func = getattr(type_class, 'avg')
+        arg_spec = inspect.getfullargspec(avg_func)
         if len(arg_spec.args) != 2:
             raise ValueError
         if arg_spec.args[0] == 'self':
@@ -27,15 +40,15 @@ def best_effort_avg(left, right):
             raise ValueError
         if arg_spec.varkw is not None:
             raise ValueError
-        return left.avg(left, right)
+        return cast(T, avg_func(left, right))
 
-    arg_spec = inspect.getfullargspec(left.__init__)
+    arg_spec = inspect.getfullargspec(type_class)
     if arg_spec.varargs is not None:
         raise ValueError
     if arg_spec.varkw is not None:
         raise ValueError
 
-    avg_args = []
+    avg_args: List[Any] = []
     for key in arg_spec.args[1:]:
         if key.startswith('_'):
             key = key[1:]
@@ -43,22 +56,22 @@ def best_effort_avg(left, right):
         right_val = getattr(right, key)
         avg = best_effort_avg(left_val, right_val)
         avg_args.append(avg)
-    return left.__class__(*avg_args)
+    return type_class(*avg_args)  # type: ignore
 
 
-class LeftRight(object):
+class LeftRight(Generic[T]):
     """Wrapper around measurements taken on both the left and right sides.
     This augments the two measurements by adding a meta-measurement with the "avg"/"best" combination of both."""
 
     __slots__ = ['left', 'right']
 
-    def __init__(self, left, right):
+    def __init__(self, left: Optional[T], right: Optional[T]):
         if type(left) != type(right) and left is not None and right is not None:  # pylint: disable=C0123
             raise ValueError(f'Left and right types not the same: left="{type(left)}", left="{type(right)}"')
-        self.left = left
-        self.right = right
+        self.left: Optional[T] = left
+        self.right: Optional[T] = right
 
-    def avg(self):
+    def avg(self) -> Optional[T]:
         """meta-measurement with the "avg"/"best" combination of both."""
         return best_effort_avg(self.left, self.right)
 

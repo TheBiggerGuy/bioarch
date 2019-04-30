@@ -5,7 +5,7 @@ import enum
 from enum import Enum
 import functools
 import logging
-from typing import Any, Optional
+from typing import Any, cast, Optional
 
 
 from ensure import ensure_annotations
@@ -31,7 +31,7 @@ class AgeCategory(Enum):
         if value is None:
             return None
         if type(value) == AgeCategory:  # pylint: disable=C0123
-            return value
+            return cast(AgeCategory, value)
         if not isinstance(value, str):
             raise ValueError(f'Failed to parse {AgeCategory.__name__}: "{value}"')
         value = value.upper()
