@@ -164,6 +164,4 @@ workflows:
             - lint
           filters:
             tags:
-              only: /[0-9]+(\.[0-9]+)*/
-            branches:
-              only: master
+              only: /v[0-9]+(\.[0-9]+)*/
