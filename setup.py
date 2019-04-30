@@ -49,10 +49,13 @@ class VerifyVersionCommand(install):
     description = 'verify that the git tag matches our version'
 
     def run(self):
-        tag = getenv('CIRCLE_TAG')
+        circleci_tag = getenv('CIRCLE_TAG')
 
-        if tag != meta_data.version:
-            info = f'Git tag: {tag} does not match the version of this app: {meta_data.version}'
+        if circleci_tag is None:
+            sys.exit(f'Faied to find "CIRCLE_TAG" env')
+
+        if ('v' + circleci_tag) != meta_data.version:
+            info = f'CircleCI Git tag "{circleci_tag}" does not match the version of this app "{meta_data.version}"'
             sys.exit(info)
 
 
@@ -61,7 +64,7 @@ class PyTest(TestCommand):
 
     def initialize_options(self):
         TestCommand.initialize_options(self)
-        self.pytest_args = ''
+        self.pytest_args = ''  # pylint: disable=W0201
 
     def run_tests(self):
         import shlex
