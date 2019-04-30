@@ -149,16 +149,28 @@ workflows:
   version: 2
   build-and-test:
     jobs:
-      - build
+      - build:
+          filters:  # required since 'deploy' has tag filters
+            tags:
+              only: /.*/
       - test37:
           requires:
             - build
+          filters:  # required since 'deploy' has tag filters
+            tags:
+              only: /.*/
       - test38:
           requires:
             - build
+          filters:  # required since 'deploy' has tag filters
+            tags:
+              only: /.*/
       - lint:
           requires:
             - test37
+          filters:  # required since 'deploy' has tag filters
+            tags:
+              only: /.*/
       - deploy:
           requires:
             - test38
@@ -166,5 +178,3 @@ workflows:
           filters:
             tags:
               only: /^v.*/
-            branches:
-              ignore: /.*/
