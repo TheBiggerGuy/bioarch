@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from codecs import open  # To use a consistent encoding
 from os import getenv, path
 import re
 import sys
@@ -14,7 +13,9 @@ from setuptools.command.test import test as TestCommand  # noqa: N812
 class MetatDataFetcher(object):
     """docstring for MetatDataFetcher"""
     def __init__(self, module_name):
-        with open(f'{module_name}/__init__.py', 'r') as fd:
+        pwd = path.abspath(path.dirname(__file__))
+
+        with open(path.join(pwd, module_name, '__init__.py'), mode='r', encoding='utf-8') as fd:
             contents = fd.read()
         version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
                             contents, re.MULTILINE).group(1)
@@ -28,14 +29,12 @@ class MetatDataFetcher(object):
             raise RuntimeError('Cannot find title information')
         if not author:
             raise RuntimeError('Cannot find author information')
-
         self.version = version
         self.title = title
         self.author = author
 
         # Get the long description from the README file
-        here = path.abspath(path.dirname(__file__))
-        with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+        with open(path.join(pwd, 'README.md'), mode='r', encoding='utf-8') as f:
             long_description = f.read()
         if not long_description:
             raise RuntimeError('Cannot find long_description information')
