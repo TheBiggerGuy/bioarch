@@ -102,5 +102,5 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         "License :: OSI Approved :: MIT License",
     ],
-    python_requires='>=3',
+    python_requires='>=3.7',
 )
