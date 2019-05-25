@@ -49,6 +49,8 @@ commands:
       - run:
           name: run Tox << parameters.env >>
           command: |
+            DEBIAN_FRONTEND=noninteractive sudo apt-get update
+            DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends build-essential fortran-compiler libatlas-base-dev
             . venv/bin/activate
             tox -vv -e << parameters.env >> -- << parameters.args >>
 
