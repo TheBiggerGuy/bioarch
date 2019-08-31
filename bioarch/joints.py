@@ -17,6 +17,14 @@ from .left_right import LeftRight
 logger = logging.getLogger(__name__)
 
 
+def is_none_or_na(condition):
+    if condition is None:
+        return True
+    if isinstance(condition, LeftRight):
+        return is_none_or_na(condition.avg())
+    return condition == JointCondition.NOT_PRESENT
+
+
 @functools.total_ordering
 @enum.unique
 class JointCondition(Enum):
@@ -119,9 +127,11 @@ class Joints(object):  # pylint: disable=R0902
             else:
                 labels.append(f'{prefix}{key}')
                 values.append(value)
+                labels.append(f'{prefix}{key}_avg')
+                values.append(value)
         s = pd.Series(values, index=labels, copy=True)
 
-        subset = pd.Series([v.value for k, v in s.items() if v is not None and k.endswith('_avg')])
+        subset = pd.Series([v.value for k, v in s.items() if not is_none_or_na(v) and k.endswith('_avg')])
         s = s.append(pd.Series([subset.mean(skipna=True)], index=[f'{prefix}mean']))
         s = s.append(pd.Series([subset.max(skipna=True)], index=[f'{prefix}max']))
         s = s.append(pd.Series([subset.min(skipna=True)], index=[f'{prefix}min']))

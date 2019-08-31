@@ -4,7 +4,8 @@
 import unittest
 
 
-from .joints import JointCondition
+from .joints import is_none_or_na, JointCondition, Joints
+from .left_right import LeftRight
 
 
 class JointConditionTest(unittest.TestCase):
@@ -46,6 +47,40 @@ class JointConditionTest(unittest.TestCase):
         va2 = JointCondition.EXTREAM
         self.assertEqual(JointCondition.avg(va1, va2), JointCondition.MEDIUM)
         self.assertEqual(JointCondition.avg(va2, va1), JointCondition.MEDIUM)
+
+
+class JointsTest(unittest.TestCase):
+    def test_to_pd_series(self):
+        shoulder = LeftRight(JointCondition.NORMAL, JointCondition.NORMAL)
+        elbow = LeftRight(JointCondition.NOT_PRESENT, JointCondition.NOT_PRESENT)
+        wrist = LeftRight(JointCondition.NORMAL, JointCondition.NOT_PRESENT)
+        hip = LeftRight(JointCondition.NOT_PRESENT, JointCondition.NORMAL)
+        knee = LeftRight(JointCondition.NORMAL, JointCondition.MEDIUM)
+        ankle = LeftRight(JointCondition.FRACTURE, JointCondition.FRACTURE)
+
+        sacro_illiac = JointCondition.NORMAL
+        c1_3 = JointCondition.NOT_PRESENT
+        c4_7 = JointCondition.NORMAL
+        t1_4 = JointCondition.NORMAL
+        t5_8 = JointCondition.NORMAL
+        t9_12 = JointCondition.NORMAL
+        l1_5 = JointCondition.NORMAL
+
+        joints = Joints(shoulder, elbow, wrist, hip, knee, ankle, sacro_illiac, c1_3, c4_7, t1_4, t5_8, t9_12, l1_5)
+
+        series = joints.to_pd_series()
+        self.assertEqual(series.to_json(), '{"shoulder_left":{"name":"NORMAL","value":0},"shoulder_right":{"name":"NORMAL","value":0},"shoulder_avg":{"name":"NORMAL","value":0},"elbow_left":{"name":"NOT_PRESENT","value":-1},"elbow_right":{"name":"NOT_PRESENT","value":-1},"elbow_avg":{"name":"NOT_PRESENT","value":-1},"wrist_left":{"name":"NORMAL","value":0},"wrist_right":{"name":"NOT_PRESENT","value":-1},"wrist_avg":{"name":"NORMAL","value":0},"hip_left":{"name":"NOT_PRESENT","value":-1},"hip_right":{"name":"NORMAL","value":0},"hip_avg":{"name":"NORMAL","value":0},"knee_left":{"name":"NORMAL","value":0},"knee_right":{"name":"MEDIUM","value":2},"knee_avg":{"name":"MILD","value":1},"ankle_left":{"name":"FRACTURE","value":6},"ankle_right":{"name":"FRACTURE","value":6},"ankle_avg":{"name":"FRACTURE","value":6},"sacro_illiac":{"name":"NORMAL","value":0},"sacro_illiac_avg":{"name":"NORMAL","value":0},"c1_3":{"name":"NOT_PRESENT","value":-1},"c1_3_avg":{"name":"NOT_PRESENT","value":-1},"c4_7":{"name":"NORMAL","value":0},"c4_7_avg":{"name":"NORMAL","value":0},"t1_4":{"name":"NORMAL","value":0},"t1_4_avg":{"name":"NORMAL","value":0},"t5_8":{"name":"NORMAL","value":0},"t5_8_avg":{"name":"NORMAL","value":0},"t9_12":{"name":"NORMAL","value":0},"t9_12_avg":{"name":"NORMAL","value":0},"l1_5":{"name":"NORMAL","value":0},"l1_5_avg":{"name":"NORMAL","value":0},"mean":0.6363636364,"max":6,"min":0,"count":11}')
+
+    def test_is_none_or_na(self):
+        self.assertEqual(is_none_or_na(None), True)
+
+        self.assertEqual(is_none_or_na(JointCondition.NOT_PRESENT), True)
+        self.assertEqual(is_none_or_na(JointCondition.NORMAL), False)
+
+        self.assertEqual(is_none_or_na(LeftRight(JointCondition.NOT_PRESENT, JointCondition.NOT_PRESENT)), True)
+        self.assertEqual(is_none_or_na(LeftRight(JointCondition.NOT_PRESENT, JointCondition.NORMAL)), False)
+        self.assertEqual(is_none_or_na(LeftRight(JointCondition.NORMAL, JointCondition.NOT_PRESENT)), False)
+        self.assertEqual(is_none_or_na(LeftRight(JointCondition.NORMAL, JointCondition.NORMAL)), False)
 
 
 def main():
