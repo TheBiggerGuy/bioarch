@@ -159,12 +159,12 @@ workflows:
           filters:  # required since 'deploy' has tag filters
             tags:
               only: /.*/
-      - test38:
-          requires:
-            - build
-          filters:  # required since 'deploy' has tag filters
-            tags:
-              only: /.*/
+      # - test38:
+      #     requires:
+      #       - build
+      #     filters:  # required since 'deploy' has tag filters
+      #       tags:
+      #         only: /.*/
       - lint:
           requires:
             - test37
@@ -173,7 +173,7 @@ workflows:
               only: /.*/
       - deploy:
           requires:
-            - test38
+            #- test38
             - lint
           filters:
             tags:
