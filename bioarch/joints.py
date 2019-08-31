@@ -67,6 +67,11 @@ class JointCondition(Enum):
         logger.error('Failed to parse JointCondition: "%s"', value)
         raise ValueError
 
+    def to_pd_value(self):
+        if self == JointCondition.NOT_PRESENT:
+            return None
+        return self
+
     @staticmethod
     def avg(left, right):
         if left in (None, JointCondition.NOT_PRESENT):
@@ -121,16 +126,16 @@ class Joints(object):  # pylint: disable=R0902
         for key, value in self.__dict__.items():
             if isinstance(value, LeftRight):
                 labels.append(f'{prefix}{key}_left')
-                values.append(value.left)
+                values.append(value.left.to_pd_value())
                 labels.append(f'{prefix}{key}_right')
-                values.append(value.right)
+                values.append(value.right.to_pd_value())
                 labels.append(f'{prefix}{key}_avg')
                 values.append(value.avg())
             else:
                 labels.append(f'{prefix}{key}')
-                values.append(value)
+                values.append(value.to_pd_value())
                 labels.append(f'{prefix}{key}_avg')
-                values.append(value)
+                values.append(value.to_pd_value())
         s = pd.Series(values, index=labels, copy=True)
 
         subset = pd.Series([v.value for k, v in s.items() if not is_none_or_na(v) and k.endswith('_avg')])
