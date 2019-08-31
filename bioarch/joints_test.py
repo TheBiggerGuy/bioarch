@@ -12,6 +12,7 @@ class JointConditionTest(unittest.TestCase):
     def test_parse(self):
         self.assertEqual(JointCondition.parse(None), None)
         self.assertEqual(JointCondition.parse('NA'), JointCondition.NOT_PRESENT)
+        self.assertEqual(JointCondition.parse('N'), JointCondition.NOT_PRESENT)
         self.assertEqual(JointCondition.parse('NOT_PRESENT'), JointCondition.NOT_PRESENT)
         self.assertEqual(JointCondition.parse('1'), JointCondition.MILD)
         self.assertEqual(JointCondition.parse('MILD'), JointCondition.MILD)
@@ -24,6 +25,9 @@ class JointConditionTest(unittest.TestCase):
         self.assertEqual(JointCondition.parse('4'), JointCondition.FUSED)
         self.assertEqual(JointCondition.parse('5'), JointCondition.SCHMORALS_NODES)
         self.assertEqual(JointCondition.parse('6'), JointCondition.FRACTURE)
+
+        self.assertEqual(JointCondition.parse(-1), JointCondition.NOT_PRESENT)
+        self.assertEqual(JointCondition.parse(0), JointCondition.NORMAL)
 
         with self.assertRaises(ValueError):
             JointCondition.parse('')

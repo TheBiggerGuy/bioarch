@@ -52,6 +52,8 @@ class JointCondition(Enum):
             return None
         if type(value) == JointCondition:  # pylint: disable=C0123
             return value
+        if isinstance(value, int):
+            value = str(value)
         if not isinstance(value, str):
             raise ValueError(f'Failed to parse JointCondition: "{value}"')
         value = value.upper()
@@ -60,7 +62,7 @@ class JointCondition(Enum):
                 return condition
             if value == str(condition.value):
                 return condition
-        if value == 'NA':
+        if value in ('NA', 'N'):
             return JointCondition.NOT_PRESENT
         logger.error('Failed to parse JointCondition: "%s"', value)
         raise ValueError
