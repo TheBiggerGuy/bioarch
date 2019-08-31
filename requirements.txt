@@ -1,3 +1,3 @@
-numpy >= 1.16
-pandas >= 0.24
+numpy >= 1.17
+pandas >= 0.25
 ensure >= 0.8
