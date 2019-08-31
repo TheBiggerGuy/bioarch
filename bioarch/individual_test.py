@@ -5,6 +5,7 @@ import unittest
 
 
 from .individual import AgeSexStature, BurialInfo, Individual, LongBoneMeasurement
+from .joints import Joints
 from .left_right import LeftRight
 from .mouth import Mouth
 from .occupational_markers import OccupationalMarkers
@@ -41,8 +42,9 @@ class IndividualTest(unittest.TestCase):
         age_sex_sature = AgeSexStature.empty()
         mouth = Mouth.empty()
         occupational_markers = OccupationalMarkers.empty()
+        joints = Joints.empty()
 
-        individual = Individual('id_1', burial_info, age_sex_sature, mouth, occupational_markers)
+        individual = Individual('id_1', burial_info, age_sex_sature, mouth, occupational_markers, joints)
 
         self.assertEqual(individual.id, 'id_1')
 
@@ -51,8 +53,9 @@ class IndividualTest(unittest.TestCase):
         age_sex_sature = AgeSexStature.empty()
         mouth = Mouth.empty()
         occupational_markers = OccupationalMarkers.empty()
+        joints = Joints.empty()
 
-        individual = Individual('id_1', burial_info, age_sex_sature, mouth, occupational_markers)
+        individual = Individual('id_1', burial_info, age_sex_sature, mouth, occupational_markers, joints)
         individual.to_pd_series()
 
 

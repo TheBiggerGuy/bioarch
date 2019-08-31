@@ -9,6 +9,7 @@ import pandas as pd
 
 
 from .age import EstimatedAge
+from .joints import Joints
 from .left_right import LeftRight
 from .mouth import Mouth
 from .occupational_markers import OccupationalMarkers
@@ -126,12 +127,13 @@ class AgeSexStature(object):
 
 class Individual(object):
     """docstring for Individual"""
-    def __init__(self, _id: str, site: BurialInfo, age_sex_stature: AgeSexStature, mouth: Mouth, occupational_markers: OccupationalMarkers):
+    def __init__(self, _id: str, site: BurialInfo, age_sex_stature: AgeSexStature, mouth: Mouth, occupational_markers: OccupationalMarkers, joints: Joints):
         self.id = _id
         self.site = site
         self.age_sex_stature = age_sex_stature
         self.mouth = mouth
         self.occupational_markers = occupational_markers
+        self.joints = joints
 
     def to_pd_series(self):
         s = pd.Series([self.id], index=['id'], copy=True)
@@ -139,6 +141,7 @@ class Individual(object):
         s = s.append(self.age_sex_stature.to_pd_series(prefix='ass_'))
         s = s.append(self.mouth.to_pd_series(prefix='mouth_'))
         s = s.append(self.occupational_markers.to_pd_series(prefix='om_'))
+        s = s.append(self.joints.to_pd_series(prefix='joints_'))
         return s
 
 
