@@ -5,6 +5,7 @@ import enum
 from enum import Enum
 import functools
 import logging
+
 from pandas.api.types import CategoricalDtype
 
 

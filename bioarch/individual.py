@@ -87,7 +87,7 @@ class OsteologicalSex(object):
             val = getattr(self, l)
             if val is None:
                 continue
-            d[f'{l}_cat'] = pd.Series([val.name],  copy=True, dtype=Sex.dtype())
+            d[f'{l}_cat'] = pd.Series([val.name],  copy=True, dtype=Sex.dtype())  # noqa: E241
             d[f'{l}_val'] = pd.Series([val.value], copy=True, dtype='Int64')
 
         return pd.DataFrame.from_dict(d).set_index('id')

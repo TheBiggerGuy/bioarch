@@ -8,8 +8,8 @@ import logging
 from statistics import mean
 
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 
 from .left_right import LeftRight
