@@ -2,6 +2,7 @@
 
 
 import unittest
+import numpy as np
 
 
 from .joints import is_none_or_na, JointCondition, Joints
@@ -51,6 +52,18 @@ class JointConditionTest(unittest.TestCase):
         va2 = JointCondition.EXTREAM
         self.assertEqual(JointCondition.avg(va1, va2), JointCondition.MEDIUM)
         self.assertEqual(JointCondition.avg(va2, va1), JointCondition.MEDIUM)
+
+    def test_order(self):
+        self.assertEqual(sorted([JointCondition.FRACTURE, JointCondition.NORMAL]), [JointCondition.NORMAL, JointCondition.FRACTURE])
+        # None is sorted first
+        self.assertEqual(sorted([JointCondition.FRACTURE, JointCondition.NORMAL, None]), [None, JointCondition.NORMAL, JointCondition.FRACTURE])
+        # np.inf is sorted last
+        self.assertEqual(sorted([np.inf, JointCondition.FRACTURE, JointCondition.NORMAL]), [JointCondition.NORMAL, JointCondition.FRACTURE, np.inf])
+        # Numbers are sorted as if they where JointCondition.value
+        self.assertEqual(sorted([0, 3, JointCondition.MILD]), [0, JointCondition.MILD, 3])
+        # Invalid numbers fail
+        with self.assertRaises(ValueError):
+            [JointCondition.MILD, -2].sort()
 
 
 class JointsTest(unittest.TestCase):

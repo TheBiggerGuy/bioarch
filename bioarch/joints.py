@@ -9,6 +9,7 @@ from statistics import mean
 
 
 import pandas as pd
+import numpy as np
 
 
 from .left_right import LeftRight
@@ -78,6 +79,8 @@ class JointCondition(Enum):
     def __lt__(self, other):
         if other is None:
             return False
+        if other is np.inf:
+            return True
         if isinstance(other, int):
             other = JointCondition(other)
         if type(other) != type(self):  # pylint: disable=C0123
