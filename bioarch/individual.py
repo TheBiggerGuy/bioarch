@@ -79,12 +79,18 @@ class OsteologicalSex(object):
     def empty():
         return OsteologicalSex(None, None, None)
 
-    def to_pd_series(self, prefix=''):
-        labels = [f'{prefix}{label}_cat' for label in ['pelvic', 'cranium', 'combined']]
-        labels += [f'{prefix}{label}_val' for label in ['pelvic', 'cranium', 'combined']]
-        vals = [self.pelvic, self.cranium, self.combined]
-        vals += [x if x is None else x.value for x in vals]
-        return pd.Series(vals, index=labels, copy=True)
+    def to_pd_data_frame(self, index):
+        d = {
+            'id': pd.Series([index]),
+        }
+        for l in ('pelvic', 'cranium', 'combined'):
+            val = getattr(self, l)
+            if val is None:
+                continue
+            d[f'{l}_cat'] = pd.Series([val.name],  copy=True, dtype=Sex.dtype())  # noqa: E241
+            d[f'{l}_val'] = pd.Series([val.value], copy=True, dtype='Int64')
+
+        return pd.DataFrame.from_dict(d).set_index('id')
 
 
 class AgeSexStature(object):
@@ -109,11 +115,10 @@ class AgeSexStature(object):
     def empty():
         return AgeSexStature(OsteologicalSex.empty(), EstimatedAge.empty(), LongBoneMeasurement.empty_lr(), LongBoneMeasurement.empty_lr(), LongBoneMeasurement.empty_lr(), '', '')
 
-    def to_pd_series(self, prefix=''):
-        labels = [f'{prefix}{label}' for label in ['stature', 'body_mass']]
-        s = pd.Series([self.stature, self.body_mass], index=labels, copy=True)
+    def to_pd_data_frame(self, index, prefix=''):
+        labels = ['id'] + [f'{prefix}{label}' for label in ['stature', 'body_mass']]
+        s = pd.Series([index, self.stature, self.body_mass], index=labels, copy=True)
 
-        s = s.append(self.osteological_sex.to_pd_series(prefix=f'{prefix}osteological_sex_'))
         s = s.append(self.age.to_pd_series(prefix=f'{prefix}age_'))
 
         for bone in ('femur', 'humerus', 'tibia'):
@@ -122,7 +127,10 @@ class AgeSexStature(object):
             s = s.append(lr_val.right.to_pd_series(prefix=f'{prefix}{bone}_right_'))
             s = s.append(lr_val.avg().to_pd_series(prefix=f'{prefix}{bone}_avg_'))
 
-        return s
+        df = pd.DataFrame.from_dict({index: s}, orient='index')
+        oss = self.osteological_sex.to_pd_data_frame(index).add_prefix(f'{prefix}osteological_sex_').rename(columns={f'{prefix}osteological_sex_id': 'id'})
+
+        return df.join(oss, on='id', how='outer')
 
 
 class Individual(object):
@@ -135,14 +143,18 @@ class Individual(object):
         self.occupational_markers = occupational_markers
         self.joints = joints
 
-    def to_pd_series(self):
+    def to_pd_data_frame(self):
         s = pd.Series([self.id], index=['id'], copy=True)
         s = s.append(self.site.to_pd_series(prefix='site_'))
-        s = s.append(self.age_sex_stature.to_pd_series(prefix='ass_'))
         s = s.append(self.mouth.to_pd_series(prefix='mouth_'))
         s = s.append(self.occupational_markers.to_pd_series(prefix='om_'))
         s = s.append(self.joints.to_pd_series(prefix='joints_'))
-        return s
+
+        ass_df = self.age_sex_stature.to_pd_data_frame(self.id, prefix='ass_')
+        ass_df.drop(columns=['id'], inplace=True)
+
+        df = pd.DataFrame.from_dict({self.id: s}, orient='index')
+        return df.join(ass_df, on='id', how='outer')
 
 
 if __name__ == "__main__":

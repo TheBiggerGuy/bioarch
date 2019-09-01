@@ -78,10 +78,14 @@ class JointCondition(Enum):
     def __lt__(self, other):
         if other is None:
             return False
+        if other == float('inf'):
+            return True
+        if other == float('-inf'):
+            return False
         if isinstance(other, int):
             other = JointCondition(other)
         if type(other) != type(self):  # pylint: disable=C0123
-            logger.warning('Attempt to compare: %s with %s', self, other)
+            logger.warning('Attempt to compare: %s (%s) with %s (%s)', self, type(self), other, type(other))
             raise NotImplementedError
         return (self.value < other.value)  # pylint: disable=C0325,W0143
 
@@ -121,7 +125,7 @@ class Joints(object):  # pylint: disable=R0902
             return None
         if condition == JointCondition.NOT_PRESENT:
             return None
-        return condition
+        return condition.name
 
     def to_pd_series(self, prefix=''):
         labels = []
@@ -141,7 +145,7 @@ class Joints(object):  # pylint: disable=R0902
                 values.append(Joints._to_pd_value(value))
         s = pd.Series(values, index=labels, copy=True)
 
-        subset = pd.Series([v.value for k, v in s.items() if not is_none_or_na(v) and k.endswith('_avg')])
+        subset = pd.Series([JointCondition.parse(v).value for k, v in s.items() if not is_none_or_na(v) and k.endswith('_avg')])
         s = s.append(pd.Series([subset.mean(skipna=True)], index=[f'{prefix}mean']))
         s = s.append(pd.Series([subset.max(skipna=True)], index=[f'{prefix}max']))
         s = s.append(pd.Series([subset.min(skipna=True)], index=[f'{prefix}min']))

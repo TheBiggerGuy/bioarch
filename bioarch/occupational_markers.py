@@ -193,6 +193,8 @@ class OccupationalMarkers(object):  # pylint: disable=R0902
             values.append(value.right)
             labels.append(f'{prefix}{key}_avg')
             values.append(value.avg())
+            labels.append(f'{prefix}{key}_avg_val')
+            values.append(None if value.avg() is None else value.avg().as_num())
         s = pd.Series(values, index=labels, copy=True)
 
         subset = pd.Series([v.as_num() for k, v in s.items() if v is not None and k.endswith('_avg')])
