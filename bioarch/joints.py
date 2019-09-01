@@ -8,7 +8,6 @@ import logging
 from statistics import mean
 
 
-import numpy as np
 import pandas as pd
 
 
@@ -79,12 +78,14 @@ class JointCondition(Enum):
     def __lt__(self, other):
         if other is None:
             return False
-        if other is np.inf:
+        if other == float('inf'):
             return True
+        if other == float('-inf'):
+            return False
         if isinstance(other, int):
             other = JointCondition(other)
         if type(other) != type(self):  # pylint: disable=C0123
-            logger.warning('Attempt to compare: %s with %s', self, other)
+            logger.warning('Attempt to compare: %s (%s) with %s (%s)', self, type(self), other, type(other))
             raise NotImplementedError
         return (self.value < other.value)  # pylint: disable=C0325,W0143
 

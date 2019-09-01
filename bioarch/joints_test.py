@@ -4,9 +4,6 @@
 import unittest
 
 
-import numpy as np
-
-
 from .joints import is_none_or_na, JointCondition, Joints
 from .left_right import LeftRight
 
@@ -59,8 +56,8 @@ class JointConditionTest(unittest.TestCase):
         self.assertEqual(sorted([JointCondition.FRACTURE, JointCondition.NORMAL]), [JointCondition.NORMAL, JointCondition.FRACTURE])
         # None is sorted first
         self.assertEqual(sorted([JointCondition.FRACTURE, JointCondition.NORMAL, None]), [None, JointCondition.NORMAL, JointCondition.FRACTURE])
-        # np.inf is sorted last
-        self.assertEqual(sorted([np.inf, JointCondition.FRACTURE, JointCondition.NORMAL]), [JointCondition.NORMAL, JointCondition.FRACTURE, np.inf])
+        # +-inf is sorted first/last
+        self.assertEqual(sorted([float('inf'), JointCondition.FRACTURE, JointCondition.NORMAL, float('-inf')]), [float('-inf'), JointCondition.NORMAL, JointCondition.FRACTURE, float('inf')])
         # Numbers are sorted as if they where JointCondition.value
         self.assertEqual(sorted([0, 3, JointCondition.MILD]), [0, JointCondition.MILD, 3])
         # Invalid numbers fail
