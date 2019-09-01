@@ -49,6 +49,13 @@ class Sex(Enum):
         logger.error('Failed to parse sex: "%s"', value)
         return Sex.UNKNOWN
 
+    def as_bin(self):
+        if self == Sex.UNKNOWN:
+            return None
+        if self.value > 50:
+            return Sex.MALE
+        return Sex.FEMALE
+
     def __lt__(self, other):
         if other is None:
             return False
