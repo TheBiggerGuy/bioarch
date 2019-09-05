@@ -12,6 +12,7 @@ from .left_right import LeftRight
 from .mouth import Mouth, Tooth
 from .occupational_markers import EnthesialMarker, OccupationalMarkers
 from .sex import Sex
+from .trauma import Trauma, TraumaCategory
 
 
 if sys.version_info < (3, 7):
@@ -20,8 +21,8 @@ if sys.version_info < (3, 7):
 
 
 __title__ = 'bioarch'
-__version__ = '0.0.14'
+__version__ = '0.0.15'
 __author__ = 'Guy Taylor'
 
 __all__ = ['AgeCategory', 'EstimatedAge'] + ['Context'] + ['AgeSexStature', 'BurialInfo', 'Individual', 'LongBoneMeasurement', 'OsteologicalSex'] + \
-          ['JointCondition', 'Joints'] + ['EnthesialMarker', 'OccupationalMarkers'] + ['LeftRight'] + ['Mouth', 'Tooth'] + ['Sex']
+          ['JointCondition', 'Joints'] + ['EnthesialMarker', 'OccupationalMarkers'] + ['LeftRight'] + ['Mouth', 'Tooth'] + ['Sex'] + ['Trauma', 'TraumaCategory']
