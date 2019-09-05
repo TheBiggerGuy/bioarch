@@ -136,7 +136,8 @@ class AgeSexStature(object):
         age = self.age.to_pd_data_frame(index).add_prefix(f'{prefix}age_').rename(columns={f'{prefix}age_id': 'id'})
         oss = self.osteological_sex.to_pd_data_frame(index).add_prefix(f'{prefix}osteological_sex_').rename(columns={f'{prefix}osteological_sex_id': 'id'})
 
-        return df.join(age, on='id', how='outer').join(oss, on='id', how='outer')
+        return df.join(age, on='id', how='outer', sort=False) \
+                 .join(oss, on='id', how='outer', sort=False)
 
 
 class Individual(object):
@@ -165,9 +166,9 @@ class Individual(object):
         context_df = self.context.to_pd_data_frame(self.id, prefix='context_')
 
         df = pd.DataFrame.from_dict({self.id: s}, orient='index')
-        return df.join(ass_df, on='id', how='outer') \
-                 .join(trauma_df, on='id', how='outer') \
-                 .join(context_df, on='id', how='outer')
+        return df.join(ass_df, on='id', how='outer', sort=False) \
+                 .join(trauma_df, on='id', how='outer', sort=False) \
+                 .join(context_df, on='id', how='outer', sort=False)
 
 
 if __name__ == "__main__":
