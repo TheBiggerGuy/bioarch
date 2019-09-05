@@ -6,6 +6,8 @@ from enum import Enum
 import functools
 import logging
 
+from pandas.api.types import CategoricalDtype
+
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +49,13 @@ class Sex(Enum):
         logger.error('Failed to parse sex: "%s"', value)
         return Sex.UNKNOWN
 
+    def as_bin(self):
+        if self == Sex.UNKNOWN:
+            return None
+        if int(self.value) > 50:  # For to int to fix https://github.com/PyCQA/pylint/issues/2306
+            return Sex.MALE
+        return Sex.FEMALE
+
     def __lt__(self, other):
         if other is None:
             return False
@@ -62,6 +71,10 @@ class Sex(Enum):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def dtype():
+        return CategoricalDtype(categories=[s.name for s in Sex], ordered=True)
 
 
 if __name__ == "__main__":
