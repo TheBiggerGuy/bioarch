@@ -52,7 +52,7 @@ class Sex(Enum):
     def as_bin(self):
         if self == Sex.UNKNOWN:
             return None
-        if self.value > 50:
+        if int(self.value) > 50:  # For to int to fix https://github.com/PyCQA/pylint/issues/2306
             return Sex.MALE
         return Sex.FEMALE
 

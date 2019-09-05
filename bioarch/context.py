@@ -1,25 +1,16 @@
 #!/usr/bin/env python
 
 
-import enum
-from enum import Enum
-import functools
-import logging
-from typing import Any, cast, Optional
+from typing import Dict, Optional, Union
 
 
-from ensure import ensure_annotations
 import pandas as pd
-
-
-logger = logging.getLogger(__name__)
 
 
 class Context(object):
     """docstring for Context"""
 
-    @ensure_annotations
-    def __init__(self, tags):
+    def __init__(self, tags: Dict[str, Optional[Union[str, int, bool, float]]]):
         self.tags = tags
 
     @staticmethod
