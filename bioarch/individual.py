@@ -89,6 +89,11 @@ class OsteologicalSex(object):
                 continue
             d[f'{l}_cat'] = pd.Series([val.name],  copy=True, dtype=Sex.dtype())  # noqa: E241
             d[f'{l}_val'] = pd.Series([val.value], copy=True, dtype='Int64')
+            val_bin = val.as_bin()
+            if val_bin is None:
+                continue
+            d[f'{l}_bin_cat'] = pd.Series([val_bin.name],  copy=True, dtype=Sex.dtype())  # noqa: E241
+            d[f'{l}_bin_val'] = pd.Series([val_bin.value], copy=True, dtype='Int64')
 
         return pd.DataFrame.from_dict(d).set_index('id')
 
