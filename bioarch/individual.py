@@ -14,6 +14,7 @@ from .left_right import LeftRight
 from .mouth import Mouth
 from .occupational_markers import OccupationalMarkers
 from .sex import Sex
+from .context import Context
 
 
 # Notes:
@@ -140,13 +141,14 @@ class AgeSexStature(object):
 
 class Individual(object):
     """docstring for Individual"""
-    def __init__(self, _id: str, site: BurialInfo, age_sex_stature: AgeSexStature, mouth: Mouth, occupational_markers: OccupationalMarkers, joints: Joints):
+    def __init__(self, _id: str, site: BurialInfo, age_sex_stature: AgeSexStature, mouth: Mouth, occupational_markers: OccupationalMarkers, joints: Joints, context: Context):
         self.id = _id
         self.site = site
         self.age_sex_stature = age_sex_stature
         self.mouth = mouth
         self.occupational_markers = occupational_markers
         self.joints = joints
+        self.context = context
 
     def to_pd_data_frame(self):
         s = pd.Series([self.id], index=['id'], copy=True)
@@ -158,8 +160,10 @@ class Individual(object):
         ass_df = self.age_sex_stature.to_pd_data_frame(self.id, prefix='ass_')
         ass_df.drop(columns=['id'], inplace=True)
 
+        context_df = self.context.to_pd_data_frame(self.id, prefix='context_')
+
         df = pd.DataFrame.from_dict({self.id: s}, orient='index')
-        return df.join(ass_df, on='id', how='outer')
+        return df.join(ass_df, on='id', how='outer').join(context_df, on='id', how='outer')
 
 
 if __name__ == "__main__":
