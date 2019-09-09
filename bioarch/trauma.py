@@ -70,7 +70,7 @@ class TraumaCategory(Enum):
 
     @staticmethod
     def dtype():
-        return CategoricalDtype(categories=[s.name for s in TraumaCategory], ordered=True)
+        return CategoricalDtype(categories=[s.name for s in TraumaCategory], ordered=False)
 
 
 class Trauma(object):  # pylint: disable=R0902
@@ -108,20 +108,23 @@ class Trauma(object):  # pylint: disable=R0902
                 continue
             if val.left is not None:
                 d[f'{l}_left_cat'] = pd.Series([val.left.name],  copy=True, dtype=TraumaCategory.dtype())  # noqa: E241
-                d[f'{l}_left_val'] = pd.Series([val.left.value], copy=True, dtype='Int64')
+                d[f'{l}_left_val'] = pd.Series([val.left.value], copy=True)
             if val.right is not None:
                 d[f'{l}_right_cat'] = pd.Series([val.right.name],  copy=True, dtype=TraumaCategory.dtype())  # noqa: E241
-                d[f'{l}_right_val'] = pd.Series([val.right.value], copy=True, dtype='Int64')
-            if val.avg() is not None:
-                d[f'{l}_avg_cat'] = pd.Series([val.avg().name],  copy=True, dtype=TraumaCategory.dtype())  # noqa: E241
-                d[f'{l}_avg_val'] = pd.Series([val.avg().value], copy=True, dtype='Int64')
+                d[f'{l}_right_val'] = pd.Series([val.right.value], copy=True)
+            try:
+                if val.avg() is not None:
+                    d[f'{l}_avg_cat'] = pd.Series([val.avg().name],  copy=True, dtype=TraumaCategory.dtype())  # noqa: E241
+                    d[f'{l}_avg_val'] = pd.Series([val.avg().value], copy=True)
+            except NotImplementedError:
+                logger.warning('Can not "avg": "%s"', self)
 
         for l in ('facial_bones', 'ribs', 'vertabrae'):
             val = getattr(self, l)
             if val is None:
                 continue
             d[f'{l}_cat'] = pd.Series([val.name],  copy=True, dtype=TraumaCategory.dtype())  # noqa: E241
-            d[f'{l}_val'] = pd.Series([val.value], copy=True, dtype='Int64')
+            d[f'{l}_val'] = pd.Series([val.value], copy=True)
 
         return pd.DataFrame.from_dict(d).set_index('id')
 
