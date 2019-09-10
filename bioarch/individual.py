@@ -126,8 +126,6 @@ class AgeSexStature(object):
         labels = ['id'] + [f'{prefix}{label}' for label in ['stature', 'body_mass']]
         s = pd.Series([index, self.stature, self.body_mass], index=labels, copy=True)
 
-        s = s.append(self.age.to_pd_series(prefix=f'{prefix}age_'))
-
         for bone in ('femur', 'humerus', 'tibia'):
             lr_val = getattr(self, bone)
             s = s.append(lr_val.left.to_pd_series(prefix=f'{prefix}{bone}_left_'))
@@ -135,9 +133,10 @@ class AgeSexStature(object):
             s = s.append(lr_val.avg().to_pd_series(prefix=f'{prefix}{bone}_avg_'))
 
         df = pd.DataFrame.from_dict({index: s}, orient='index')
+        age = self.age.to_pd_data_frame(index).add_prefix(f'{prefix}age_').rename(columns={f'{prefix}age_id': 'id'})
         oss = self.osteological_sex.to_pd_data_frame(index).add_prefix(f'{prefix}osteological_sex_').rename(columns={f'{prefix}osteological_sex_id': 'id'})
 
-        return df.join(oss, on='id', how='outer')
+        return df.join(age, on='id', how='outer').join(oss, on='id', how='outer')
 
 
 class Individual(object):

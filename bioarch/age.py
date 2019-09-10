@@ -10,6 +10,7 @@ from typing import Any, cast, Optional
 
 from ensure import ensure_annotations
 import pandas as pd
+from pandas.api.types import CategoricalDtype
 
 
 logger = logging.getLogger(__name__)
@@ -46,6 +47,19 @@ class AgeCategory(Enum):
             return AgeCategory.YOUNG_ADULT
         raise ValueError(f'Failed to parse {AgeCategory.__name__}: "{value}"')
 
+    def as_quad(self):
+        if self == AgeCategory.UNKNOWN:
+            return AgeCategory.UNKNOWN
+        if self in (AgeCategory.YOUNG, AgeCategory.YOUNG_ADULT):
+            return AgeCategory.YOUNG
+        if self == AgeCategory.ADULT:
+            return AgeCategory.ADULT
+        if self in (AgeCategory.MIDDLE, AgeCategory.MIDDLE_OLD):
+            return AgeCategory.MIDDLE
+        if self == AgeCategory.OLD:
+            return AgeCategory.OLD
+        raise RuntimeError(f'Unknown AgeCategory.to_quad: {self}')
+
     def __lt__(self, other):
         if other is None:
             return False
@@ -61,6 +75,10 @@ class AgeCategory(Enum):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def dtype():
+        return CategoricalDtype(categories=[s.name for s in AgeCategory], ordered=True)
 
 
 class EstimatedAge(object):
@@ -102,11 +120,18 @@ class EstimatedAge(object):
     def empty():
         return EstimatedAge('UNKNOWN', 'UNKNOWN')
 
-    def to_pd_series(self, prefix=''):
-        ranged_val = None if self.ranged is None else pd.RangeIndex.from_range(self.ranged)
-        values = [self.category.name, self.category.value, ranged_val]
-        labels = [f'{prefix}category', f'{prefix}category_val', f'{prefix}ranged_val']
-        return pd.Series(values, index=labels, copy=True)
+    def to_pd_data_frame(self, index):
+        d = {
+            'id': pd.Series([index]),
+            'category_cat': pd.Series([self.category.name], copy=True, dtype=AgeCategory.dtype()),
+            'category_val': pd.Series([self.category.value], copy=True),
+            'category_quad_cat': pd.Series([self.category.as_quad().name], copy=True, dtype=AgeCategory.dtype()),
+            'category_quad_val': pd.Series([self.category.as_quad().value], copy=True),
+        }
+        if self.ranged:
+            d['ranged'] = pd.Series([pd.RangeIndex.from_range(self.ranged)], copy=True)
+
+        return pd.DataFrame.from_dict(d).set_index('id')
 
 
 if __name__ == "__main__":
