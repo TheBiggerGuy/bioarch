@@ -34,6 +34,15 @@ class AgeCategoryTest(unittest.TestCase):
         self.assertEqual(AgeCategory.parse(None), None)
         self.assertEqual(AgeCategory.parse(AgeCategory.UNKNOWN), AgeCategory.UNKNOWN)
 
+    def test_to_quad(self):
+        self.assertEqual(AgeCategory.UNKNOWN.as_quad(), AgeCategory.UNKNOWN)
+        self.assertEqual(AgeCategory.YOUNG.as_quad(), AgeCategory.YOUNG)
+        self.assertEqual(AgeCategory.YOUNG_ADULT.as_quad(), AgeCategory.YOUNG)
+        self.assertEqual(AgeCategory.ADULT.as_quad(), AgeCategory.ADULT)
+        self.assertEqual(AgeCategory.MIDDLE.as_quad(), AgeCategory.MIDDLE)
+        self.assertEqual(AgeCategory.MIDDLE_OLD.as_quad(), AgeCategory.MIDDLE)
+        self.assertEqual(AgeCategory.OLD.as_quad(), AgeCategory.OLD)
+
 
 class EstimatedAgeTest(unittest.TestCase):
     def test_costructor(self):
@@ -49,12 +58,12 @@ class EstimatedAgeTest(unittest.TestCase):
         self.assertEqual(EstimatedAge('OLD', 'UNKNOWN').ranged, None)
         self.assertEqual(EstimatedAge('OLD', '?').ranged, None)
 
-    def test_to_pd_series(self):
-        series = EstimatedAge('UNKNOWN', 'UNKNOWN').to_pd_series()
-        self.assertEqual(series.to_json(), '{"category":"UNKNOWN","category_val":0,"ranged_val":null}')
+    def test_to_pd_data_frame(self):
+        df = EstimatedAge('UNKNOWN', 'UNKNOWN').to_pd_data_frame('id1')
+        self.assertEqual(df.to_json(orient='records'), '[{"category_cat":"UNKNOWN","category_val":0,"category_quad_cat":"UNKNOWN","category_quad_val":0}]')
 
-        series = EstimatedAge('OLD', '45-60').to_pd_series()
-        self.assertEqual(series.to_json(), '{"category":"OLD","category_val":6,"ranged_val":[45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]}')
+        df = EstimatedAge('OLD', '45-60').to_pd_data_frame('id1')
+        self.assertEqual(df.to_json(orient='records'), '[{"category_cat":"OLD","category_val":6,"category_quad_cat":"OLD","category_quad_val":6,"ranged":[45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]}]')
 
 
 def main():
