@@ -116,6 +116,15 @@ class Tooth(object):
         return (self.tooth, self.calculus, self.eh, self.cavities, self.abcess) == (other.tooth, other.calculus, other.eh, other.cavities, other.abcess)
 
 
+TOOTH_GROUPS = {
+    'all': [x - 1 for x in list(range(1, 33))],
+    'molar': [x - 1 for x in [1, 2, 3, 14, 15, 16, 17, 18, 19, 30, 31, 32]],
+    'canines': [x - 1 for x in [6, 11, 22, 27]],
+    'premolars': [x - 1 for x in [4, 5, 12, 13, 20, 21, 28, 29]],
+    'incisors': [x - 1 for x in [7, 8, 9, 10, 23, 24, 25, 26]],
+}
+
+
 class Mouth(object):
     """Object to hold the 32 teeth"""
     def __init__(self, teeth: List[Tooth]):
@@ -127,10 +136,13 @@ class Mouth(object):
     def empty():
         return Mouth([Tooth.empty()] * 32)
 
-    def to_pd_series(self, prefix=''):
-        number_of_teeth = sum([1 for t in self.teeth if t.tooth != 'NA'])
+    def _to_pd_series_group(self, group, prefix):
+        prefix = f'{prefix}{group}_'
+        teeth = [tooth for i, tooth in enumerate(self.teeth) if i in TOOTH_GROUPS[group]]
+
+        number_of_teeth = sum([1 for t in teeth if t.tooth != 'NA'])
         s = pd.Series([number_of_teeth], index=[f'{prefix}number_of_teeth'], copy=True)
-        for i, tooth in enumerate(self.teeth):
+        for i, tooth in enumerate(teeth):
             s = s.append(tooth.to_pd_series(prefix=f'{prefix}tooth_{i}_'))
         for label in Tooth.__slots__:
             label = label[1:]
@@ -140,6 +152,9 @@ class Mouth(object):
             s = s.append(pd.Series([subset.min(skipna=True)], index=[f'{prefix}{label}_min']))
             s = s.append(pd.Series([subset.count()], index=[f'{prefix}{label}_count']))
         return s
+
+    def to_pd_series(self, prefix=''):
+        return pd.concat([self._to_pd_series_group(group, prefix) for group in TOOTH_GROUPS])
 
 
 if __name__ == "__main__":
