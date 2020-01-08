@@ -67,8 +67,9 @@ class PyTest(TestCommand):
         self.pytest_args = ''  # pylint: disable=W0201
 
     def run_tests(self):
-        import shlex
-        import pytest  # import here, cause outside the eggs aren't loaded
+        # import here, cause outside the eggs aren't loaded
+        import shlex  # pylint: disable=C0415
+        import pytest  # pylint: disable=C0415
         errno = pytest.main(shlex.split(self.pytest_args))
         sys.exit(errno)
 

@@ -34,7 +34,7 @@ class TraumaCategoryTest(unittest.TestCase):
 
     def test_avg(self):
         self.assertEqual(TraumaCategory.avg(TraumaCategory.NOT_PRESENT, TraumaCategory.NOT_PRESENT), TraumaCategory.NOT_PRESENT)
-        
+
         self.assertEqual(TraumaCategory.avg(TraumaCategory.NOT_PRESENT, TraumaCategory.PARTIAL_BONE), TraumaCategory.PARTIAL_BONE)
         self.assertEqual(TraumaCategory.avg(TraumaCategory.PARTIAL_BONE, TraumaCategory.NOT_PRESENT), TraumaCategory.PARTIAL_BONE)
 
