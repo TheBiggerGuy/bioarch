@@ -19,7 +19,7 @@ class Context(object):
 
     def to_pd_data_frame(self, index, prefix=''):
         labels = [f'{prefix}{label}' for label in self.tags.keys()]
-        s = pd.Series([val for val in self.tags.values()], index=labels, copy=True)
+        s = pd.Series([val for val in self.tags.values()], index=labels, copy=True)  # pylint: disable=R1721
 
         return pd.DataFrame.from_dict({index: s}, orient='index')
 

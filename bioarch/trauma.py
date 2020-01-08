@@ -60,6 +60,8 @@ class TraumaCategory(Enum):
             return right
         if right in (None, TraumaCategory.NOT_PRESENT):
             return left
+        if left == right:
+            return left
         raise NotImplementedError()
 
     def __repr__(self):
@@ -113,9 +115,10 @@ class Trauma(object):  # pylint: disable=R0902
                 d[f'{l}_right_cat'] = pd.Series([val.right.name],  copy=True, dtype=TraumaCategory.dtype())  # noqa: E241
                 d[f'{l}_right_val'] = pd.Series([val.right.value], copy=True)
             try:
-                if val.avg() is not None:
-                    d[f'{l}_avg_cat'] = pd.Series([val.avg().name],  copy=True, dtype=TraumaCategory.dtype())  # noqa: E241
-                    d[f'{l}_avg_val'] = pd.Series([val.avg().value], copy=True)
+                val_avg = val.avg()
+                if val_avg is not None:
+                    d[f'{l}_avg_cat'] = pd.Series([val_avg.name],  copy=True, dtype=TraumaCategory.dtype())  # noqa: E241
+                    d[f'{l}_avg_val'] = pd.Series([val_avg.value], copy=True)
             except NotImplementedError:
                 logger.warning('Can not "avg": "%s"', self)
 
@@ -127,6 +130,12 @@ class Trauma(object):  # pylint: disable=R0902
             d[f'{l}_val'] = pd.Series([val.value], copy=True)
 
         return pd.DataFrame.from_dict(d).set_index('id')
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self}'
+
+    def __str__(self):
+        return f'facial_bones={self.facial_bones}'
 
 
 if __name__ == "__main__":
