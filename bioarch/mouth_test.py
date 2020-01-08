@@ -58,10 +58,11 @@ class MouthTest(unittest.TestCase):
     def test_to_pd_series(self):
         random = Random(666)
         series = Mouth([Tooth('A', '2', 'NA', '0', random.choice(('NA', '0', '1'))) for _ in range(0, 32)]).to_pd_series()
-        self.assertRegex(series.to_json(), '^{"number_of_teeth":32,"tooth_0_tooth":"A",".*}$')
-        self.assertRegex(series.to_json(), '.*"abcess_mean":0.4545454545,"abcess_max":true,"abcess_min":false,"abcess_count":22}$')
+
+        self.assertRegex(series.to_json(), '^{"all_number_of_teeth":32,"all_tooth_0_tooth":"A",".*}$')
+        self.assertRegex(series.to_json(), '.*"incisors_abcess_mean":0.6666666667,"incisors_abcess_max":true,"incisors_abcess_min":false,"incisors_abcess_count":6}$')
         series = Mouth.empty().to_pd_series(prefix='mouth_')
-        self.assertTrue(series.to_json().startswith('{"mouth_number_of_teeth":0,"mouth_tooth_0_tooth":"NA","'))
+        self.assertTrue(series.to_json().startswith('{"mouth_all_number_of_teeth":0,"mouth_all_tooth_0_tooth":"NA","'))
 
 
 def main():
