@@ -74,6 +74,14 @@ class EnthesialMarker(object):
         if isinstance(value, int):
             value = float(value)
 
+        if isinstance(value, float):
+            if value > 6.0:
+                value -= 6.0
+                is_oe = True
+            if value > 3.0:
+                value -= 3.0
+                is_s = True
+
         if not isinstance(value, float):
             raise ValueError(f'Unknown EnthesialMarker: "{original_value}"')
 
