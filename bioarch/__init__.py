@@ -21,7 +21,7 @@ if sys.version_info < (3, 7):
 
 
 __title__ = 'bioarch'
-__version__ = '0.0.18'
+__version__ = '0.0.19'
 __author__ = 'Guy Taylor'
 
 __all__ = ['AgeCategory', 'EstimatedAge'] + ['Context'] + ['AgeSexStature', 'BurialInfo', 'Individual', 'LongBoneMeasurement', 'OsteologicalSex'] + \
