@@ -8,7 +8,6 @@ import logging
 from typing import Any, cast, Optional
 
 
-from ensure import ensure_annotations
 import pandas as pd
 from pandas.api.types import CategoricalDtype
 
@@ -86,8 +85,7 @@ class EstimatedAge(object):
 
     MAX_AGE = 100
 
-    @ensure_annotations
-    def __init__(self, category: str, ranged: str):
+    def __init__(self, category: str, ranged: Optional[str]):
         self.category = AgeCategory.parse(category)  # pylint: disable=W0212
         self.ranged = EstimatedAge._parse_range(ranged)
 
