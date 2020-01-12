@@ -10,7 +10,19 @@ from .occupational_markers import EnthesialMarker
 class EnthesialMarkerTest(unittest.TestCase):
     def test_parse(self):
         self.assertEqual(EnthesialMarker.parse(None), None)
+
         self.assertEqual(EnthesialMarker.parse(0), EnthesialMarker(0))
+        self.assertEqual(EnthesialMarker.parse(0.0), EnthesialMarker(0))
+
+        self.assertEqual(EnthesialMarker.parse(0.0), EnthesialMarker(0.0, is_s=False, is_oe=False))
+        self.assertEqual(EnthesialMarker.parse(0.5), EnthesialMarker(0.5, is_s=False, is_oe=False))
+
+        self.assertEqual(EnthesialMarker.parse(3.5), EnthesialMarker(0.5, is_s=True, is_oe=False))
+        self.assertEqual(EnthesialMarker.parse(4.0), EnthesialMarker(1.0, is_s=True, is_oe=False))
+
+        self.assertEqual(EnthesialMarker.parse(6.5), EnthesialMarker(0.5, is_s=False, is_oe=True))
+        self.assertEqual(EnthesialMarker.parse(7.0), EnthesialMarker(1.0, is_s=False, is_oe=True))
+
         self.assertEqual(EnthesialMarker.parse('.5'), EnthesialMarker(0.5))
         self.assertEqual(EnthesialMarker.parse('r.5'), EnthesialMarker(0.5))
         self.assertEqual(EnthesialMarker.parse('S.5'), EnthesialMarker(0.5, is_s=True))
