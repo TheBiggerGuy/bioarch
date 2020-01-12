@@ -119,7 +119,7 @@ class Trauma(object):  # pylint: disable=R0902
                     d[f'{l}_avg_cat'] = pd.Series([val_avg.name],  copy=True, dtype=TraumaCategory.dtype())  # noqa: E241
                     d[f'{l}_avg_val'] = pd.Series([val_avg.value], copy=True)
             except NotImplementedError:
-                logger.warning('Can not "avg" "%s": "%s"', l, self)
+                logger.info('Can not "avg" "%s": "%s"', l, self)
 
         for l in ('facial_bones', 'ribs', 'vertabrae'):
             val = getattr(self, l)
@@ -134,7 +134,7 @@ class Trauma(object):  # pylint: disable=R0902
         return f'{self.__class__.__name__}: {self}'
 
     def __str__(self):
-        return f'facial_bones={self.facial_bones} clavicle={self.clavicle}...'
+        return f'facial_bones="{self.facial_bones}" clavicle="{self.clavicle}" ...'
 
 
 if __name__ == "__main__":

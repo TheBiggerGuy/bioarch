@@ -117,11 +117,11 @@ class Tooth(object):
 
 
 TOOTH_GROUPS = {
-    'all': [x - 1 for x in list(range(1, 33))],
-    'molar': [x - 1 for x in [1, 2, 3, 14, 15, 16, 17, 18, 19, 30, 31, 32]],
-    'canines': [x - 1 for x in [6, 11, 22, 27]],
+    'all':       [x - 1 for x in list(range(1, 33))],    # noqa: E241
+    'molar':     [x - 1 for x in [1, 2, 3, 14, 15, 16, 17, 18, 19, 30, 31, 32]],    # noqa: E241
     'premolars': [x - 1 for x in [4, 5, 12, 13, 20, 21, 28, 29]],
-    'incisors': [x - 1 for x in [7, 8, 9, 10, 23, 24, 25, 26]],
+    'canines':   [x - 1 for x in [6, 11, 22, 27]],    # noqa: E241
+    'incisors':  [x - 1 for x in [7, 8, 9, 10, 23, 24, 25, 26]],    # noqa: E241
 }
 
 
