@@ -57,6 +57,7 @@ class EstimatedAgeTest(unittest.TestCase):
         self.assertEqual(EstimatedAge('OLD', '=20').ranged, range(20, 21))
         self.assertEqual(EstimatedAge('OLD', 'UNKNOWN').ranged, None)
         self.assertEqual(EstimatedAge('OLD', '?').ranged, None)
+        self.assertEqual(EstimatedAge('OLD', None).ranged, None)
 
     def test_to_pd_data_frame(self):
         df = EstimatedAge('UNKNOWN', 'UNKNOWN').to_pd_data_frame('id1')
