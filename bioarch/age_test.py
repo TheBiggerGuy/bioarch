@@ -64,7 +64,7 @@ class EstimatedAgeTest(unittest.TestCase):
         self.assertEqual(df.to_json(orient='records'), '[{"category_cat":"UNKNOWN","category_val":0,"category_quad_cat":"UNKNOWN","category_quad_val":0}]')
 
         df = EstimatedAge('OLD', '45-60').to_pd_data_frame('id1')
-        self.assertEqual(df.to_json(orient='records'), '[{"category_cat":"OLD","category_val":6,"category_quad_cat":"OLD","category_quad_val":6,"ranged":[45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]}]')
+        self.assertEqual(df.to_json(orient='records'), '[{"category_cat":"OLD","category_val":5,"category_quad_cat":"OLD","category_quad_val":5,"ranged":[45,46,47,48,49,50,51,52,53,54,55,56,57,58,59]}]')
 
 
 def main():
