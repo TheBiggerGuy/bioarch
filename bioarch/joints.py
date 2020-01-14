@@ -127,10 +127,10 @@ class Joints(object):  # pylint: disable=R0902
             return None
         return condition.name
 
-    def to_pd_series(self, prefix=''):
+    def _to_pd_series(self, subset_of_self, prefix):  # pylint: disable=R0201
         labels = []
         values = []
-        for key, value in self.__dict__.items():
+        for key, value in subset_of_self.items():
             if isinstance(value, LeftRight):
                 labels.append(f'{prefix}{key}_left')
                 values.append(Joints._to_pd_value(value.left))
@@ -151,6 +151,12 @@ class Joints(object):  # pylint: disable=R0902
         s = s.append(pd.Series([subset.min(skipna=True)], index=[f'{prefix}min']))
         s = s.append(pd.Series([subset.count()], index=[f'{prefix}count']))
         return s
+
+    def to_pd_series(self, prefix=''):
+        return pd.concat([self._to_pd_series({k: v for k, v in self.__dict__.items()}, f'{prefix}all_'),  # pylint: disable=R1721
+                          self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('c')}, f'{prefix}cervical_'),
+                          self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('t')}, f'{prefix}thoracic_'),
+                          self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('l')}, f'{prefix}lumbar_')])
 
 
 if __name__ == "__main__":
