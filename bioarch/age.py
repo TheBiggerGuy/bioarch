@@ -21,10 +21,10 @@ class AgeCategory(Enum):
     UNKNOWN     = 0  # noqa: E221,E222
     YOUNG       = 1  # noqa: E221,E222
     YOUNG_ADULT = 2
-    ADULT       = 3  # noqa: E221,E222
-    MIDDLE      = 4  # noqa: E221,E222
-    MIDDLE_OLD  = 5  # noqa: E221
-    OLD         = 6  # noqa: E221,E222
+    MIDDLE      = 3  # noqa: E221,E222
+    MIDDLE_OLD  = 4  # noqa: E221
+    OLD         = 5  # noqa: E221,E222
+    ADULT       = 6  # noqa: E221,E222
 
     @staticmethod
     def parse(value: Any) -> Optional['AgeCategory']:
