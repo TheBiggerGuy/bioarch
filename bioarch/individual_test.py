@@ -98,7 +98,7 @@ class IndividualTest(unittest.TestCase):
         occupational_markers = OccupationalMarkers.empty()
         joints = Joints.empty()
         trauma = Trauma.empty()
-        context = Context({'spear': True, 'pot': False})
+        context = Context(0.5, {'spear': True, 'pot': False})
 
         individual = Individual('id_1', burial_info, age_sex_sature, mouth, occupational_markers, joints, trauma, context)
         df = individual.to_pd_data_frame()

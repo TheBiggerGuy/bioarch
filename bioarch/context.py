@@ -19,6 +19,30 @@ def parse_value(value):
     raise ValueError(f'Failed to parse Boolean value "{value}" for context')
 
 
+def parse_orientation(value):
+    if value is None:
+        return None
+    if isinstance(value, str) and value.upper() == 'NA':
+        return None
+    if value in ('0', 0):
+        return 'North'
+    if value in ('0.5', 0.5):
+        return 'North-West'
+    if value in ('1', 1):
+        return 'West'
+    if value in ('1.5', 1.5):
+        return 'South-West'
+    if value in ('2', 2):
+        return 'South'
+    if value in ('2.5', 2.5):
+        return 'South-East'
+    if value in ('3', 3):
+        return 'East'
+    if value in ('3.5', 3.5):
+        return 'North-East'
+    raise ValueError(f'Failed to parse orientation value "{value}" for context')
+
+
 KNOWN_GROUPS = {
     'utilitarian'  : set(['knife', 'whetstone', 'awl', 'scissors', 'vessel', 'pot_sherd', 'flint', 'flakes', 'flint_flakes']),  # noqa: E203
     'textile'      : set(['textile', 'needle', 'spindle_whorl']),  # noqa: E203
@@ -36,12 +60,13 @@ KNOWN_GROUPS = {
 class Context(object):
     """docstring for Context"""
 
-    def __init__(self, tags: Dict[str, Optional[Union[str, int, bool, float]]]):
-        self.tags = {k: parse_value(v) for k, v in tags.items()}
+    def __init__(self, body_orientation, tags: Dict[str, Optional[Union[str, int, bool, float]]]):
+        self.body_orientation = parse_orientation(body_orientation)
+        self.tags = {k: parse_value(v) for k, v in tags.items() if k not in ('Body_orientation', )}
 
     @staticmethod
     def empty():
-        return Context({})
+        return Context(None, {})
 
     @staticmethod
     def group(value):
@@ -62,6 +87,8 @@ class Context(object):
         group_series = [self._to_pd_series(f'{prefix}all_', self.tags)]
         for group_name, group in KNOWN_GROUPS.items():
             group_series.append(self._to_pd_series(f'{prefix}{group_name}_', {k: v for k, v in self.tags.items() if k.lower() in group}))
+
+        group_series.append(pd.Series([self.body_orientation], index=[f'{prefix}body_orientation']))
 
         return pd.DataFrame.from_dict({index: pd.concat(group_series)}, orient='index')
 

@@ -1189,6 +1189,7 @@
     "context_weapons_spear": 1,
     "context_weapons_count": 1,
     "context_iron_fragment_count": 0,
-    "context_miscellaneous_count": 0
+    "context_miscellaneous_count": 0,
+    "context_body_orientation": "North-West"
   }
 ]

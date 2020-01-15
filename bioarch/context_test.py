@@ -9,27 +9,36 @@ from .context import Context
 
 class ContextTest(unittest.TestCase):
     def test_constructor(self):
-        self.assertEqual(Context({'thing': True}).tags['thing'], True)
-        self.assertEqual(Context({'thing': False}).tags['thing'], False)
+        self.assertEqual(Context(0, {'thing': True}).tags['thing'], True)
+        self.assertEqual(Context(0, {'thing': False}).tags['thing'], False)
 
-        self.assertEqual(Context({'thing': None}).tags['thing'], None)
-        self.assertEqual(Context({'thing': 'NA'}).tags['thing'], None)
-        self.assertEqual(Context({'thing': 'na'}).tags['thing'], None)
-
-        with self.assertRaises(ValueError):
-            Context({'spear': 'foo'})
+        self.assertEqual(Context(0, {'thing': None}).tags['thing'], None)
+        self.assertEqual(Context(0, {'thing': 'NA'}).tags['thing'], None)
+        self.assertEqual(Context(0, {'thing': 'na'}).tags['thing'], None)
 
         with self.assertRaises(ValueError):
-            Context({'spear': 10})
+            Context(0, {'spear': 'foo'})
+
+        with self.assertRaises(ValueError):
+            Context(0, {'spear': 10})
+
+        self.assertEqual(Context(0, {}).body_orientation, 'North')
+
+        self.assertEqual(Context(None, {}).body_orientation, None)
+        self.assertEqual(Context('NA', {}).body_orientation, None)
+
+        with self.assertRaises(ValueError):
+            Context('foo', {})
 
     def test_to_pd_data_frame(self):
-        context = Context({'spear': True,
+        context = Context(0.5,
+                          {'spear': True,
                            'pots': 'NA',
                            'knife': None})
 
         df = context.to_pd_data_frame('id1', prefix='context_')
 
-        self.assertEqual(df.to_json(orient='records'), '[{"context_all_spear":true,"context_all_pots":null,"context_all_knife":null,"context_all_count":1,"context_utilitarian_knife":null,"context_utilitarian_count":0,"context_textile_count":0,"context_equestrian_count":0,"context_economic_count":0,"context_organic_material_count":0,"context_appearance_count":0,"context_burial_container_count":0,"context_weapons_spear":1,"context_weapons_count":1,"context_iron_fragment_count":0,"context_miscellaneous_count":0}]')
+        self.assertEqual(df.to_json(orient='records'), '[{"context_all_spear":true,"context_all_pots":null,"context_all_knife":null,"context_all_count":1,"context_utilitarian_knife":null,"context_utilitarian_count":0,"context_textile_count":0,"context_equestrian_count":0,"context_economic_count":0,"context_organic_material_count":0,"context_appearance_count":0,"context_burial_container_count":0,"context_weapons_spear":1,"context_weapons_count":1,"context_iron_fragment_count":0,"context_miscellaneous_count":0,"context_body_orientation":"North-West"}]')
 
     def test_known_context_to_group(self):
         known_context_keys = {'knife': set(['utilitarian']),  # Should not be a weapons
