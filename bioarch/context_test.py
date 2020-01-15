@@ -8,37 +8,48 @@ from .context import Context
 
 
 class ContextTest(unittest.TestCase):
-    def test_constructor(self):
-        self.assertEqual(Context(0, {'thing': True}).tags['thing'], True)
-        self.assertEqual(Context(0, {'thing': False}).tags['thing'], False)
+    def test_constructor_position(self):
+        self.assertEqual(Context(0, None, {}).body_position, 'supine')
 
-        self.assertEqual(Context(0, {'thing': None}).tags['thing'], None)
-        self.assertEqual(Context(0, {'thing': 'NA'}).tags['thing'], None)
-        self.assertEqual(Context(0, {'thing': 'na'}).tags['thing'], None)
+        self.assertEqual(Context(None, None, {}).body_position, None)
+        self.assertEqual(Context('NA', None, {}).body_position, None)
 
         with self.assertRaises(ValueError):
-            Context(0, {'spear': 'foo'})
+            Context('foo', None, {})
+
+    def test_constructor_orientation(self):
+        self.assertEqual(Context(None, 0, {}).body_orientation, 'North')
+
+        self.assertEqual(Context(None, None, {}).body_orientation, None)
+        self.assertEqual(Context(None, 'NA', {}).body_orientation, None)
 
         with self.assertRaises(ValueError):
-            Context(0, {'spear': 10})
+            Context(None, 'foo', {})
 
-        self.assertEqual(Context(0, {}).body_orientation, 'North')
+    def test_constructor_tags(self):
+        self.assertEqual(Context(None, None, {'thing': True}).tags['thing'], True)
+        self.assertEqual(Context(None, None, {'thing': False}).tags['thing'], False)
 
-        self.assertEqual(Context(None, {}).body_orientation, None)
-        self.assertEqual(Context('NA', {}).body_orientation, None)
+        self.assertEqual(Context(None, None, {'thing': None}).tags['thing'], None)
+        self.assertEqual(Context(None, None, {'thing': 'NA'}).tags['thing'], None)
+        self.assertEqual(Context(None, None, {'thing': 'na'}).tags['thing'], None)
 
         with self.assertRaises(ValueError):
-            Context('foo', {})
+            Context(None, None, {'spear': 'foo'})
+
+        with self.assertRaises(ValueError):
+            Context(None, None, {'spear': 10})
 
     def test_to_pd_data_frame(self):
-        context = Context(0.5,
+        context = Context(1,
+                          0.5,
                           {'spear': True,
                            'pots': 'NA',
                            'knife': None})
 
         df = context.to_pd_data_frame('id1', prefix='context_')
 
-        self.assertEqual(df.to_json(orient='records'), '[{"context_all_spear":true,"context_all_pots":null,"context_all_knife":null,"context_all_count":1,"context_utilitarian_knife":null,"context_utilitarian_count":0,"context_textile_count":0,"context_equestrian_count":0,"context_economic_count":0,"context_organic_material_count":0,"context_appearance_count":0,"context_burial_container_count":0,"context_weapons_spear":1,"context_weapons_count":1,"context_iron_fragment_count":0,"context_miscellaneous_count":0,"context_body_orientation":"North-West"}]')
+        self.assertEqual(df.to_json(orient='records'), '[{"context_body_position":"supine with flexed legs","context_body_orientation":"North-West","context_all_spear":true,"context_all_pots":null,"context_all_knife":null,"context_all_count":1,"context_utilitarian_knife":null,"context_utilitarian_count":0,"context_textile_count":0,"context_equestrian_count":0,"context_economic_count":0,"context_organic_material_count":0,"context_appearance_count":0,"context_burial_container_count":0,"context_weapons_spear":1,"context_weapons_count":1,"context_iron_fragment_count":0,"context_miscellaneous_count":0}]')
 
     def test_known_context_to_group(self):
         known_context_keys = {'knife': set(['utilitarian']),  # Should not be a weapons

@@ -19,6 +19,26 @@ def parse_value(value):
     raise ValueError(f'Failed to parse Boolean value "{value}" for context')
 
 
+def parse_position(value):
+    if value is None:
+        return None
+    if isinstance(value, str) and value.upper() == 'NA':
+        return None
+    if value in ('0', 0):
+        return 'supine'
+    if value in ('1', 1):
+        return 'supine with flexed legs'
+    if value in ('2', 2):
+        return 'crouched'
+    if value in ('3', 3):
+        return 'crouched on left side'
+    if value in ('3', 3):
+        return 'crouched on right side'
+    if value in ('3', 3):
+        return 'laid on their stomach'
+    raise ValueError(f'Failed to parse position value "{value}" for context')
+
+
 def parse_orientation(value):
     if value is None:
         return None
@@ -60,13 +80,14 @@ KNOWN_GROUPS = {
 class Context(object):
     """docstring for Context"""
 
-    def __init__(self, body_orientation, tags: Dict[str, Optional[Union[str, int, bool, float]]]):
+    def __init__(self, body_position, body_orientation, tags: Dict[str, Optional[Union[str, int, bool, float]]]):
+        self.body_position = parse_position(body_position)
         self.body_orientation = parse_orientation(body_orientation)
-        self.tags = {k: parse_value(v) for k, v in tags.items() if k not in ('Body_orientation', )}
+        self.tags = {k: parse_value(v) for k, v in tags.items()}
 
     @staticmethod
     def empty():
-        return Context(None, {})
+        return Context(None, None, {})
 
     @staticmethod
     def group(value):
@@ -84,11 +105,11 @@ class Context(object):
         return s
 
     def to_pd_data_frame(self, index, prefix=''):
-        group_series = [self._to_pd_series(f'{prefix}all_', self.tags)]
+        group_series = [pd.Series([self.body_position, self.body_orientation], index=[f'{prefix}body_position', f'{prefix}body_orientation'])]
+
+        group_series.append(self._to_pd_series(f'{prefix}all_', self.tags))
         for group_name, group in KNOWN_GROUPS.items():
             group_series.append(self._to_pd_series(f'{prefix}{group_name}_', {k: v for k, v in self.tags.items() if k.lower() in group}))
-
-        group_series.append(pd.Series([self.body_orientation], index=[f'{prefix}body_orientation']))
 
         return pd.DataFrame.from_dict({index: pd.concat(group_series)}, orient='index')
 

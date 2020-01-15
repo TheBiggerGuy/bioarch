@@ -1176,6 +1176,8 @@
     "trauma_ribs_val": -1,
     "trauma_vertabrae_cat": "NOT_PRESENT",
     "trauma_vertabrae_val": -1,
+    "context_body_position": "supine with flexed legs",
+    "context_body_orientation": "North-West",
     "context_all_spear": 1,
     "context_all_pot": 0,
     "context_all_count": 2,
@@ -1189,7 +1191,6 @@
     "context_weapons_spear": 1,
     "context_weapons_count": 1,
     "context_iron_fragment_count": 0,
-    "context_miscellaneous_count": 0,
-    "context_body_orientation": "North-West"
+    "context_miscellaneous_count": 0
   }
 ]
