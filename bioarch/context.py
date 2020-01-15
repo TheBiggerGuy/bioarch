@@ -20,16 +20,16 @@ def parse_value(value):
 
 
 KNOWN_GROUPS = {
-    'utilitarian'  : set(['knife', 'whetstone', 'awl', 'scissors', 'vessel', 'sherd', 'flint', 'flakes']),  # noqa: E203
-    'textile'      : set(['textile', 'needle', 'spindle whorl']),  # noqa: E203
-    'equestrian'   : set(['equestrian']),  # noqa: E203
+    'utilitarian'  : set(['knife', 'whetstone', 'awl', 'scissors', 'vessel', 'pot_sherd', 'flint', 'flakes', 'flint_flakes']),  # noqa: E203
+    'textile'      : set(['textile', 'needle', 'spindle_whorl']),  # noqa: E203
+    'equestrian'   : set(['equestrian', 'horse_equipment']),  # noqa: E203
     'economic'     : set(['coins', 'scales']),  # noqa: E203
-    'organic_material': set(['animal bone', 'charcol', 'flower', 'shell', 'burned bone']),
-    'appearance'   : set(['brooch', 'cloak ring', 'bracelet', 'beads', 'comb', 'buckle', 'mount']),  # noqa: E203
-    'burial_container': set(['coffin', 'coffin substitute']),
-    'weapons'      : set(['sword', 'axe', 'iron pole', 'shield', 'spear']),  # noqa: E203
-    'iron_fragment': set(['iron frafments', 'nails']),
-    'miscellaneous': set(['lock', 'keys', 'thors hammer', 'bronze item', 'bronze disc', 'quartz']),
+    'organic_material': set(['animal_remains', 'charcoal', 'flower', 'shell', 'burned_bones']),
+    'appearance'   : set(['brooch', 'cloak ring', 'bracelet', 'beads', 'comb', 'buckle', 'mounts', 'cloak_fastener', 'iron_ring']),  # noqa: E203
+    'burial_container': set(['coffin', 'coffin_substitute']),
+    'weapons'      : set(['sword', 'axe', 'iron_pole', 'shield_boss', 'spear']),  # noqa: E203
+    'iron_fragment': set(['iron frafments', 'nails', 'iron_object', 'iron_nail/rivets']),
+    'miscellaneous': set(['lock', 'keys', 'thors_hammer', 'bronze_item', 'bronze_disk', 'quartz', 'unidentified_bronze']),
 }
 
 
