@@ -32,9 +32,9 @@ def parse_position(value):
         return 'crouched'
     if value in ('3', 3):
         return 'crouched on left side'
-    if value in ('3', 3):
+    if value in ('4', 4):
         return 'crouched on right side'
-    if value in ('3', 3):
+    if value in ('5', 5):
         return 'laid on their stomach'
     raise ValueError(f'Failed to parse position value "{value}" for context')
 
