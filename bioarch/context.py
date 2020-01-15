@@ -71,9 +71,9 @@ KNOWN_GROUPS = {
     'organic_material': set(['animal_remains', 'charcoal', 'flower', 'shell', 'burned_bones']),
     'appearance'   : set(['brooch', 'cloak ring', 'bracelet', 'beads', 'comb', 'buckle', 'mounts', 'cloak_fastener', 'iron_ring']),  # noqa: E203
     'burial_container': set(['coffin', 'coffin_substitute']),
-    'weapons'      : set(['sword', 'axe', 'iron_pole', 'shield_boss', 'spear']),  # noqa: E203
+    'weapons'      : set(['sword', 'axe', 'shield_boss', 'spear']),  # noqa: E203
     'iron_fragment': set(['iron frafments', 'nails', 'iron_object', 'iron_nail/rivets']),
-    'miscellaneous': set(['lock', 'keys', 'thors_hammer', 'bronze_item', 'bronze_disk', 'quartz', 'unidentified_bronze']),
+    'miscellaneous': set(['lock', 'keys', 'thors_hammer', 'bronze_item', 'bronze_disk', 'quartz', 'unidentified_bronze', 'iron_pole']),
 }
 
 

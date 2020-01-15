@@ -65,7 +65,7 @@ class ContextTest(unittest.TestCase):
                               'keys': set(['miscellaneous']),
                               'Sword': set(['weapons']),
                               'axe': set(['weapons']),
-                              'Iron_pole': set(['weapons']),  # Should not be iron_fragment
+                              'Iron_pole': set(['miscellaneous']),  # Should not be iron_fragment or weapons
                               'spear': set(['weapons']),
                               'shield_boss': set(['weapons']),
                               'cloak_fastener': set(['appearance']),
