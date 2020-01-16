@@ -104,14 +104,20 @@ class Context(object):
         s = s.append(pd.Series([s.count()], index=[f'{prefix}count']))
         return s
 
-    def to_pd_data_frame(self, index, prefix=''):
-        group_series = [pd.Series([self.body_position, self.body_orientation], index=[f'{prefix}body_position', f'{prefix}body_orientation'])]
+    def to_pd_data_frame(self, index):
+        simple_df = pd.DataFrame.from_dict({
+            'id': pd.Series([index]),
+            f'body_position': self.body_position,
+            f'body_orientation': self.body_orientation,
+        }).set_index('id')
 
-        group_series.append(self._to_pd_series(f'{prefix}all_', self.tags))
+        group_series = []
+        group_series.append(self._to_pd_series(f'all_', self.tags))
         for group_name, group in KNOWN_GROUPS.items():
-            group_series.append(self._to_pd_series(f'{prefix}{group_name}_', {k: v for k, v in self.tags.items() if k.lower() in group}))
+            group_series.append(self._to_pd_series(f'{group_name}_', {k: v for k, v in self.tags.items() if k.lower() in group}))
+        groups_df = pd.DataFrame.from_dict({index: pd.concat(group_series)}, orient='index')
 
-        return pd.DataFrame.from_dict({index: pd.concat(group_series)}, orient='index')
+        return simple_df.join(groups_df, on='id', how='outer')
 
 
 if __name__ == "__main__":

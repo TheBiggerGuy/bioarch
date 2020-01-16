@@ -47,9 +47,9 @@ class ContextTest(unittest.TestCase):
                            'pots': 'NA',
                            'knife': None})
 
-        df = context.to_pd_data_frame('id1', prefix='context_')
+        df = context.to_pd_data_frame('id1')
 
-        self.assertEqual(df.to_json(orient='records'), '[{"context_body_position":"supine with flexed legs","context_body_orientation":"North-West","context_all_spear":true,"context_all_pots":null,"context_all_knife":null,"context_all_count":1,"context_utilitarian_knife":null,"context_utilitarian_count":0,"context_textile_count":0,"context_equestrian_count":0,"context_economic_count":0,"context_organic_material_count":0,"context_appearance_count":0,"context_burial_container_count":0,"context_weapons_spear":1,"context_weapons_count":1,"context_iron_fragment_count":0,"context_miscellaneous_count":0}]')
+        self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","body_orientation":"North-West","all_spear":true,"all_pots":null,"all_knife":null,"all_count":1,"utilitarian_knife":null,"utilitarian_count":0,"textile_count":0,"equestrian_count":0,"economic_count":0,"organic_material_count":0,"appearance_count":0,"burial_container_count":0,"weapons_spear":1,"weapons_count":1,"iron_fragment_count":0,"miscellaneous_count":0}]')
 
     def test_known_context_to_group(self):
         known_context_keys = {'knife': set(['utilitarian']),  # Should not be a weapons
