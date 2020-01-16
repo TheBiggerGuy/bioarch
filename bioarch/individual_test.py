@@ -8,7 +8,7 @@ import unittest
 
 from . import test as bioarch_test
 from .age import EstimatedAge
-from .context import Context
+from .context import CompassBearing, Context
 from .individual import AgeSexStature, BurialInfo, Individual, LongBoneMeasurement, OsteologicalSex
 from .joints import Joints
 from .left_right import LeftRight
@@ -98,7 +98,7 @@ class IndividualTest(unittest.TestCase):
         occupational_markers = OccupationalMarkers.empty()
         joints = Joints.empty()
         trauma = Trauma.empty()
-        context = Context(1, 0.5, {'spear': True, 'pot': False})
+        context = Context(1, CompassBearing.WEST, {'spear': True, 'pot': False})
 
         individual = Individual('id_1', burial_info, age_sex_sature, mouth, occupational_markers, joints, trauma, context)
         df = individual.to_pd_data_frame()

@@ -4,7 +4,29 @@
 import unittest
 
 
-from .context import Context
+from .context import CompassBearing, Context
+
+
+class CompassBearingTest(unittest.TestCase):
+    def test_order(self):
+        self.assertEqual(sorted([CompassBearing.SOUTH, CompassBearing.NORTH]), [CompassBearing.NORTH, CompassBearing.SOUTH])
+        # None is sorted first
+        self.assertEqual(sorted([CompassBearing.SOUTH, CompassBearing.NORTH, None]), [None, CompassBearing.NORTH, CompassBearing.SOUTH])
+        # Numbers are sorted as if they where CompassBearing.value
+        self.assertEqual(sorted([0, 3, CompassBearing.EAST]), [0, CompassBearing.EAST, 3])
+        # Invalid numbers fail
+        with self.assertRaises(ValueError):
+            [CompassBearing.SOUTH, -1].sort()
+
+    def test_to_short_code(self):
+        self.assertEqual(CompassBearing.NORTH.to_short_code(), 'N')
+        self.assertEqual(CompassBearing.NORTH_EAST.to_short_code(), 'NE')
+        self.assertEqual(CompassBearing.SOUTH.to_short_code(), 'S')
+
+    def test_parse(self):
+        self.assertEqual(CompassBearing.parse('NORTH'), CompassBearing.NORTH)
+        self.assertEqual(CompassBearing.parse('N'), CompassBearing.NORTH)
+        self.assertEqual(CompassBearing.parse(None), None)
 
 
 class ContextTest(unittest.TestCase):
@@ -18,13 +40,13 @@ class ContextTest(unittest.TestCase):
             Context('foo', None, {})
 
     def test_constructor_orientation(self):
-        self.assertEqual(Context(None, 0, {}).body_orientation, 'North')
-
+        self.assertEqual(Context(None, CompassBearing.NORTH, {}).body_orientation, CompassBearing.NORTH)
         self.assertEqual(Context(None, None, {}).body_orientation, None)
-        self.assertEqual(Context(None, 'NA', {}).body_orientation, None)
 
         with self.assertRaises(ValueError):
-            Context(None, 'foo', {})
+            Context(None, 'NORTH', {})
+        with self.assertRaises(ValueError):
+            Context(None, 1, {})
 
     def test_constructor_tags(self):
         self.assertEqual(Context(None, None, {'thing': True}).tags['thing'], True)
@@ -42,14 +64,22 @@ class ContextTest(unittest.TestCase):
 
     def test_to_pd_data_frame(self):
         context = Context(1,
-                          0.5,
+                          CompassBearing.NORTH,
                           {'spear': True,
                            'pots': 'NA',
                            'knife': None})
 
-        df = context.to_pd_data_frame('id1', prefix='context_')
+        df = context.to_pd_data_frame('id1')
+        self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","body_orientation_cat":"NORTH","body_orientation_val":0,"all_spear":true,"all_pots":null,"all_knife":null,"all_present":true,"utilitarian_knife":null,"utilitarian_present":null,"textile_present":null,"equestrian_present":null,"economic_present":null,"organic_material_present":null,"appearance_present":null,"burial_container_present":null,"weapons_spear":true,"weapons_present":true,"iron_fragment_present":null,"miscellaneous_present":null}]')
 
-        self.assertEqual(df.to_json(orient='records'), '[{"context_body_position":"supine with flexed legs","context_body_orientation":"North-West","context_all_spear":true,"context_all_pots":null,"context_all_knife":null,"context_all_count":1,"context_utilitarian_knife":null,"context_utilitarian_count":0,"context_textile_count":0,"context_equestrian_count":0,"context_economic_count":0,"context_organic_material_count":0,"context_appearance_count":0,"context_burial_container_count":0,"context_weapons_spear":1,"context_weapons_count":1,"context_iron_fragment_count":0,"context_miscellaneous_count":0}]')
+        context = Context(1,
+                          None,
+                          {'spear': True,
+                           'pots': 'NA',
+                           'knife': None})
+
+        df = context.to_pd_data_frame('id1')
+        self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","all_spear":true,"all_pots":null,"all_knife":null,"all_present":true,"utilitarian_knife":null,"utilitarian_present":null,"textile_present":null,"equestrian_present":null,"economic_present":null,"organic_material_present":null,"appearance_present":null,"burial_container_present":null,"weapons_spear":true,"weapons_present":true,"iron_fragment_present":null,"miscellaneous_present":null}]')
 
     def test_known_context_to_group(self):
         known_context_keys = {'knife': set(['utilitarian']),  # Should not be a weapons

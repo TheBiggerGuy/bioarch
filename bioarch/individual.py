@@ -162,7 +162,7 @@ class Individual(object):
         ass_df.drop(columns=['id'], inplace=True)
 
         trauma_df = self.trauma.to_pd_data_frame(self.id).add_prefix('trauma_').rename(columns={f'trauma_id': 'id'})
-        context_df = self.context.to_pd_data_frame(self.id, prefix='context_')
+        context_df = self.context.to_pd_data_frame(self.id).add_prefix('context_').rename(columns={f'context_id': 'id'})
 
         df = pd.DataFrame.from_dict({self.id: s}, orient='index')
         return df.join(ass_df, on='id', how='outer') \

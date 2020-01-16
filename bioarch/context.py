@@ -1,10 +1,70 @@
 #!/usr/bin/env python
 
 
-from typing import Dict, Optional, Union
+import enum
+from enum import Enum
+import functools
+import logging
+from typing import Any, cast, Dict, Optional, Union
 
 
 import pandas as pd
+from pandas.api.types import CategoricalDtype
+
+
+logger = logging.getLogger(__name__)
+
+
+@functools.total_ordering
+@enum.unique
+class CompassBearing(Enum):
+    NORTH      = 0  # noqa: E221
+    NORTH_EAST = 1
+    EAST       = 2  # noqa: E221
+    SOUTH_EAST = 3
+    SOUTH      = 4  # noqa: E221
+    SOUTH_WEST = 5
+    WEST       = 6  # noqa: E221
+    NORTH_WEST = 7
+
+    @staticmethod
+    def parse(value: Any) -> Optional['CompassBearing']:
+        if value is None:
+            return None
+        if type(value) == CompassBearing:  # pylint: disable=C0123
+            return cast(CompassBearing, value)
+        if not isinstance(value, str):
+            raise ValueError(f'Failed to parse {CompassBearing.__name__}: "{value}"')
+        value = value.upper()
+        for bearing in CompassBearing:
+            if value == bearing.name:
+                return bearing
+            if value == bearing.to_short_code():
+                return bearing
+        raise ValueError(f'Failed to parse {CompassBearing.__name__}: "{value}"')
+
+    def to_short_code(self):
+        return ''.join([p[0] for p in str(self.name).split('_')])
+
+    def __lt__(self, other):
+        if other is None:
+            return False
+        if isinstance(other, int):
+            other = CompassBearing(other)
+        if type(other) != type(self):  # pylint: disable=C0123
+            logger.warning('Attempt to compare: %s with %s', self, other)
+            raise NotImplementedError
+        return (self.value < other.value)  # pylint: disable=C0325,W0143
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self}'
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def dtype():
+        return CategoricalDtype(categories=[s.name for s in CompassBearing], ordered=True)
 
 
 def parse_value(value):
@@ -39,30 +99,6 @@ def parse_position(value):
     raise ValueError(f'Failed to parse position value "{value}" for context')
 
 
-def parse_orientation(value):
-    if value is None:
-        return None
-    if isinstance(value, str) and value.upper() == 'NA':
-        return None
-    if value in ('0', 0):
-        return 'North'
-    if value in ('0.5', 0.5):
-        return 'North-West'
-    if value in ('1', 1):
-        return 'West'
-    if value in ('1.5', 1.5):
-        return 'South-West'
-    if value in ('2', 2):
-        return 'South'
-    if value in ('2.5', 2.5):
-        return 'South-East'
-    if value in ('3', 3):
-        return 'East'
-    if value in ('3.5', 3.5):
-        return 'North-East'
-    raise ValueError(f'Failed to parse orientation value "{value}" for context')
-
-
 KNOWN_GROUPS = {
     'utilitarian'  : set(['knife', 'whetstone', 'awl', 'scissors', 'vessel', 'pot_sherd', 'flint', 'flakes', 'flint_flakes']),  # noqa: E203
     'textile'      : set(['textile', 'needle', 'spindle_whorl']),  # noqa: E203
@@ -80,9 +116,13 @@ KNOWN_GROUPS = {
 class Context(object):
     """docstring for Context"""
 
-    def __init__(self, body_position, body_orientation, tags: Dict[str, Optional[Union[str, int, bool, float]]]):
+    def __init__(self, body_position, body_orientation: Optional[CompassBearing], tags: Dict[str, Optional[Union[str, int, bool, float]]]):
         self.body_position = parse_position(body_position)
-        self.body_orientation = parse_orientation(body_orientation)
+
+        if body_orientation is not None and not isinstance(body_orientation, CompassBearing):
+            raise ValueError(f'Invalid body_orientation: "{body_orientation}"')
+        self.body_orientation = body_orientation
+
         self.tags = {k: parse_value(v) for k, v in tags.items()}
 
     @staticmethod
@@ -101,17 +141,26 @@ class Context(object):
     def _to_pd_series(self, prefix, tags):  # pylint: disable=R0201
         labels = [f'{prefix}{label}' for label in tags.keys()]
         s = pd.Series([val for val in tags.values()], index=labels, copy=True)  # pylint: disable=R1721
-        s = s.append(pd.Series([s.count()], index=[f'{prefix}count']))
+        s = s.append(pd.Series([s.max()], index=[f'{prefix}present']))
         return s
 
-    def to_pd_data_frame(self, index, prefix=''):
-        group_series = [pd.Series([self.body_position, self.body_orientation], index=[f'{prefix}body_position', f'{prefix}body_orientation'])]
+    def to_pd_data_frame(self, index):
+        simple_data = {
+            'id': pd.Series([index]),
+            'body_position': pd.Series([self.body_position]),
+        }
 
-        group_series.append(self._to_pd_series(f'{prefix}all_', self.tags))
+        if self.body_orientation:
+            simple_data['body_orientation_cat'] = pd.Series([self.body_orientation.name], copy=True, dtype=CompassBearing.dtype())
+            simple_data['body_orientation_val'] = pd.Series([self.body_orientation.value], copy=True, dtype='Int64')
+
+        group_series = []
+        group_series.append(self._to_pd_series(f'all_', self.tags))
         for group_name, group in KNOWN_GROUPS.items():
-            group_series.append(self._to_pd_series(f'{prefix}{group_name}_', {k: v for k, v in self.tags.items() if k.lower() in group}))
+            group_series.append(self._to_pd_series(f'{group_name}_', {k: v for k, v in self.tags.items() if k.lower() in group}))
+        groups_df = pd.DataFrame.from_dict({index: pd.concat(group_series)}, orient='index')
 
-        return pd.DataFrame.from_dict({index: pd.concat(group_series)}, orient='index')
+        return pd.DataFrame.from_dict(simple_data).set_index('id').join(groups_df, on='id', how='outer')
 
 
 if __name__ == "__main__":
