@@ -141,7 +141,7 @@ class Context(object):
     def _to_pd_series(self, prefix, tags):  # pylint: disable=R0201
         labels = [f'{prefix}{label}' for label in tags.keys()]
         s = pd.Series([val for val in tags.values()], index=labels, copy=True)  # pylint: disable=R1721
-        s = s.append(pd.Series([s.count()], index=[f'{prefix}count']))
+        s = s.append(pd.Series([s.max()], index=[f'{prefix}present']))
         return s
 
     def to_pd_data_frame(self, index):

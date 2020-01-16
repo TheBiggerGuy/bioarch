@@ -70,7 +70,7 @@ class ContextTest(unittest.TestCase):
                            'knife': None})
 
         df = context.to_pd_data_frame('id1')
-        self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","body_orientation_cat":"NORTH","body_orientation_val":0,"all_spear":true,"all_pots":null,"all_knife":null,"all_count":1,"utilitarian_knife":null,"utilitarian_count":0,"textile_count":0,"equestrian_count":0,"economic_count":0,"organic_material_count":0,"appearance_count":0,"burial_container_count":0,"weapons_spear":1,"weapons_count":1,"iron_fragment_count":0,"miscellaneous_count":0}]')
+        self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","body_orientation_cat":"NORTH","body_orientation_val":0,"all_spear":true,"all_pots":null,"all_knife":null,"all_present":true,"utilitarian_knife":null,"utilitarian_present":null,"textile_present":null,"equestrian_present":null,"economic_present":null,"organic_material_present":null,"appearance_present":null,"burial_container_present":null,"weapons_spear":true,"weapons_present":true,"iron_fragment_present":null,"miscellaneous_present":null}]')
 
         context = Context(1,
                           None,
@@ -79,7 +79,7 @@ class ContextTest(unittest.TestCase):
                            'knife': None})
 
         df = context.to_pd_data_frame('id1')
-        self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","all_spear":true,"all_pots":null,"all_knife":null,"all_count":1,"utilitarian_knife":null,"utilitarian_count":0,"textile_count":0,"equestrian_count":0,"economic_count":0,"organic_material_count":0,"appearance_count":0,"burial_container_count":0,"weapons_spear":1,"weapons_count":1,"iron_fragment_count":0,"miscellaneous_count":0}]')
+        self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","all_spear":true,"all_pots":null,"all_knife":null,"all_present":true,"utilitarian_knife":null,"utilitarian_present":null,"textile_present":null,"equestrian_present":null,"economic_present":null,"organic_material_present":null,"appearance_present":null,"burial_container_present":null,"weapons_spear":true,"weapons_present":true,"iron_fragment_present":null,"miscellaneous_present":null}]')
 
     def test_known_context_to_group(self):
         known_context_keys = {'knife': set(['utilitarian']),  # Should not be a weapons
