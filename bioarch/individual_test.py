@@ -6,6 +6,9 @@ import json
 import unittest
 
 
+from pandas.api.types import CategoricalDtype
+
+
 from . import test as bioarch_test
 from .age import EstimatedAge
 from .context import CompassBearing, Context
@@ -27,7 +30,9 @@ class OsteologicalSexTest(unittest.TestCase):
 
         df = os.to_pd_data_frame('id1')
 
-        self.assertEqual(df.to_json(orient='records'), '[{"pelvic_cat":"MALE","pelvic_val":100,"pelvic_bin_cat":"MALE","pelvic_bin_val":100,"combined_cat":"MALE_ASSUMED","combined_val":80,"combined_bin_cat":"MALE","combined_bin_val":100}]')
+        self.assertIsInstance(df['pelvic_cat'].dtypes, CategoricalDtype)
+        self.assertIsInstance(df['pelvic_bin_cat'].dtypes, CategoricalDtype)
+        self.assertEqual(df.to_json(orient='records'), '[{"pelvic_cat":"MALE","pelvic_val":100,"pelvic_bin_cat":"MALE","pelvic_bin_val":100,"cranium_cat":null,"cranium_val":null,"cranium_bin_cat":null,"cranium_bin_val":null,"combined_cat":"MALE_ASSUMED","combined_val":80,"combined_bin_cat":"MALE","combined_bin_val":100}]')
 
 
 class AgeSexStatureTest(unittest.TestCase):
