@@ -4,6 +4,9 @@
 import unittest
 
 
+from pandas.api.types import CategoricalDtype
+
+
 from .context import CompassBearing, Context
 
 
@@ -70,6 +73,8 @@ class ContextTest(unittest.TestCase):
                            'knife': None})
 
         df = context.to_pd_data_frame('id1')
+
+        self.assertIsInstance(df['body_orientation_cat'].dtypes, CategoricalDtype)
         self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","body_orientation_cat":"NORTH","body_orientation_val":0,"all_spear":true,"all_pots":null,"all_knife":null,"all_present":true,"utilitarian_knife":null,"utilitarian_present":null,"textile_present":null,"equestrian_present":null,"economic_present":null,"organic_material_present":null,"appearance_present":null,"burial_container_present":null,"weapons_spear":true,"weapons_present":true,"iron_fragment_present":null,"miscellaneous_present":null}]')
 
         context = Context(1,
@@ -79,7 +84,8 @@ class ContextTest(unittest.TestCase):
                            'knife': None})
 
         df = context.to_pd_data_frame('id1')
-        self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","all_spear":true,"all_pots":null,"all_knife":null,"all_present":true,"utilitarian_knife":null,"utilitarian_present":null,"textile_present":null,"equestrian_present":null,"economic_present":null,"organic_material_present":null,"appearance_present":null,"burial_container_present":null,"weapons_spear":true,"weapons_present":true,"iron_fragment_present":null,"miscellaneous_present":null}]')
+        self.assertIsInstance(df['body_orientation_cat'].dtypes, CategoricalDtype)
+        self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","body_orientation_cat":null,"body_orientation_val":null,"all_spear":true,"all_pots":null,"all_knife":null,"all_present":true,"utilitarian_knife":null,"utilitarian_present":null,"textile_present":null,"equestrian_present":null,"economic_present":null,"organic_material_present":null,"appearance_present":null,"burial_container_present":null,"weapons_spear":true,"weapons_present":true,"iron_fragment_present":null,"miscellaneous_present":null}]')
 
     def test_known_context_to_group(self):
         known_context_keys = {'knife': set(['utilitarian']),  # Should not be a weapons

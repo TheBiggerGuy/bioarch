@@ -150,9 +150,9 @@ class Context(object):
             'body_position': pd.Series([self.body_position]),
         }
 
-        if self.body_orientation:
-            simple_data['body_orientation_cat'] = pd.Series([self.body_orientation.name], copy=True, dtype=CompassBearing.dtype())
-            simple_data['body_orientation_val'] = pd.Series([self.body_orientation.value], copy=True, dtype='Int64')
+        #if self.body_orientation:
+        simple_data['body_orientation_cat'] = pd.Series([self.body_orientation.name if self.body_orientation else None], copy=True, dtype=CompassBearing.dtype())
+        simple_data['body_orientation_val'] = pd.Series([self.body_orientation.value if self.body_orientation else None], copy=True, dtype='Int64')
 
         group_series = []
         group_series.append(self._to_pd_series(f'all_', self.tags))
