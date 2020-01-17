@@ -138,11 +138,14 @@ class Context(object):
                 groups.add(group_name)
         return groups
 
-    def _to_pd_series(self, prefix, tags):  # pylint: disable=R0201
+    def _to_pd_series(self, prefix, tags, include_all=False):  # pylint: disable=R0201
         labels = [f'{prefix}{label}' for label in tags.keys()]
-        s = pd.Series([val for val in tags.values()], index=labels, copy=True)  # pylint: disable=R1721
-        s = s.append(pd.Series([s.max()], index=[f'{prefix}present']))
-        return s
+        all_data = pd.Series([val for val in tags.values()], index=labels, copy=True)  # pylint: disable=R1721
+        
+        result = pd.Series([all_data.max()], index=[f'{prefix}present'])
+        if include_all:
+            result = all_data.append(result)
+        return result
 
     def to_pd_data_frame(self, index):
         simple_data = {
@@ -155,7 +158,7 @@ class Context(object):
         simple_data['body_orientation_val'] = pd.Series([self.body_orientation.value if self.body_orientation else None], copy=True, dtype='Int64')
 
         group_series = []
-        group_series.append(self._to_pd_series(f'all_', self.tags))
+        group_series.append(self._to_pd_series(f'all_', self.tags, include_all=True))
         for group_name, group in KNOWN_GROUPS.items():
             group_series.append(self._to_pd_series(f'{group_name}_', {k: v for k, v in self.tags.items() if k.lower() in group}))
         groups_df = pd.DataFrame.from_dict({index: pd.concat(group_series)}, orient='index')
