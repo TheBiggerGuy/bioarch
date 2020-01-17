@@ -136,25 +136,31 @@ class Mouth(object):
     def empty():
         return Mouth([Tooth.empty()] * 32)
 
-    def _to_pd_series_group(self, group, prefix):
+    def _to_pd_series_group(self, group, prefix, include_all=False):
         prefix = f'{prefix}{group}_'
         teeth = [tooth for i, tooth in enumerate(self.teeth) if i in TOOTH_GROUPS[group]]
 
-        number_of_teeth = sum([1 for t in teeth if t.tooth != 'NA'])
-        s = pd.Series([number_of_teeth], index=[f'{prefix}number_of_teeth'], copy=True)
+        per_tooth = pd.Series([], index=[])
         for i, tooth in enumerate(teeth):
-            s = s.append(tooth.to_pd_series(prefix=f'{prefix}tooth_{i}_'))
+            per_tooth = per_tooth.append(tooth.to_pd_series(prefix=f'{prefix}tooth_{i}_'))
+
+        number_of_teeth = sum([1 for t in teeth if t.tooth != 'NA'])
+        summaray = pd.Series([number_of_teeth], index=[f'{prefix}number_of_teeth'], copy=True)
         for label in Tooth.__slots__:
             label = label[1:]
-            subset = pd.Series([v for k, v in s.items() if label in k and k.endswith('_val')])
-            s = s.append(pd.Series([subset.mean(skipna=True)], index=[f'{prefix}{label}_mean']))
-            s = s.append(pd.Series([subset.max(skipna=True)], index=[f'{prefix}{label}_max']))
-            s = s.append(pd.Series([subset.min(skipna=True)], index=[f'{prefix}{label}_min']))
-            s = s.append(pd.Series([subset.count()], index=[f'{prefix}{label}_count']))
-        return s
+            subset = pd.Series([v for k, v in per_tooth.items() if label in k and k.endswith('_val')])
+            summaray = summaray.append(pd.Series([subset.mean(skipna=True)], index=[f'{prefix}{label}_mean']))
+            summaray = summaray.append(pd.Series([subset.max(skipna=True)], index=[f'{prefix}{label}_max']))
+            summaray = summaray.append(pd.Series([subset.min(skipna=True)], index=[f'{prefix}{label}_min']))
+            summaray = summaray.append(pd.Series([subset.count()], index=[f'{prefix}{label}_count']))
+
+        result = summaray
+        if include_all:
+            result = per_tooth.append(result)
+        return result
 
     def to_pd_series(self, prefix=''):
-        return pd.concat([self._to_pd_series_group(group, prefix) for group in TOOTH_GROUPS])
+        return pd.concat([self._to_pd_series_group(group, prefix, include_all=(group == 'all')) for group in TOOTH_GROUPS])
 
 
 if __name__ == "__main__":
