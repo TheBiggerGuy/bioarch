@@ -152,11 +152,19 @@ class Joints(object):  # pylint: disable=R0902
         s = s.append(pd.Series([subset.count()], index=[f'{prefix}count']))
         return s
 
-    def to_pd_series(self, prefix=''):
-        return pd.concat([self._to_pd_series({k: v for k, v in self.__dict__.items()}, f'{prefix}all_'),  # pylint: disable=R1721
-                          self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('c')}, f'{prefix}cervical_'),
-                          self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('t')}, f'{prefix}thoracic_'),
-                          self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('l')}, f'{prefix}lumbar_')])
+    def to_pd_data_frame(self, index):
+        data = {
+            'id': pd.Series([index]),
+        }
+        df = pd.DataFrame.from_dict(data).set_index('id')
+
+        s =  pd.concat([self._to_pd_series({k: v for k, v in self.__dict__.items()}, 'all_'),  # pylint: disable=R1721
+                        self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('c')}, 'cervical_'),
+                        self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('t')}, 'thoracic_'),
+                        self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('l')}, 'lumbar_')])
+        joint_df = pd.DataFrame.from_dict({index: s}, orient='index')
+
+        return df.join(joint_df, on='id', how='outer')
 
 
 if __name__ == "__main__":

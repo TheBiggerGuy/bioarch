@@ -69,7 +69,7 @@ class JointConditionTest(unittest.TestCase):
 
 
 class JointsTest(unittest.TestCase):
-    def test_to_pd_series(self):
+    def test_to_pd_data_frame(self):
         shoulder = LeftRight(JointCondition.NORMAL, JointCondition.NORMAL)
         elbow = LeftRight(JointCondition.NOT_PRESENT, JointCondition.NOT_PRESENT)
         wrist = LeftRight(JointCondition.NORMAL, JointCondition.NOT_PRESENT)
@@ -85,14 +85,13 @@ class JointsTest(unittest.TestCase):
         t9_12 = JointCondition.NORMAL
         l1_5 = JointCondition.NORMAL
 
-        joints = Joints(shoulder, elbow, wrist, hip, knee, ankle, sacro_illiac, c1_3, c4_7, t1_4, t5_8, t9_12, l1_5)
-        series = joints.to_pd_series()
+        df = Joints(shoulder, elbow, wrist, hip, knee, ankle, sacro_illiac, c1_3, c4_7, t1_4, t5_8, t9_12, l1_5).to_pd_data_frame('id1')
 
-        with open_binary(bioarch_test, 'JointsTest.test_to_pd_series.json') as json_stream:
+        with open_binary(bioarch_test, 'JointsTest.test_to_pd_data_frame.json') as json_stream:
             expected_json = json.load(json_stream)
 
-        print(series.to_json())
-        actual_json = json.loads(series.to_json())
+        print(df.to_json(orient='records'))
+        actual_json = json.loads(df.to_json(orient='records'))
 
         self.assertEqual(actual_json, expected_json)
 

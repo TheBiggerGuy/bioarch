@@ -158,15 +158,16 @@ class Individual(object):
         s = pd.Series([self.id], index=['id'], copy=True)
         s = s.append(self.site.to_pd_series(prefix='site_'))
         s = s.append(self.mouth.to_pd_series(prefix='mouth_'))
-        s = s.append(self.joints.to_pd_series(prefix='joints_'))
 
+        joints_df = self.joints.to_pd_data_frame(self.id).add_prefix('joints_').rename(columns={f'joints_id': 'id'})
         ass_df = self.age_sex_stature.to_pd_data_frame(self.id).add_prefix('ass_').rename(columns={f'ass_id': 'id'})
         om_df = self.occupational_markers.to_pd_data_frame(self.id).add_prefix('om_').rename(columns={f'om_id': 'id'})
         trauma_df = self.trauma.to_pd_data_frame(self.id).add_prefix('trauma_').rename(columns={f'trauma_id': 'id'})
         context_df = self.context.to_pd_data_frame(self.id).add_prefix('context_').rename(columns={f'context_id': 'id'})
 
         df = pd.DataFrame.from_dict({self.id: s}, orient='index')
-        return df.join(ass_df, on='id', how='outer') \
+        return df.join(joints_df, on='id', how='outer') \
+                 .join(ass_df, on='id', how='outer') \
                  .join(om_df, on='id', how='outer') \
                  .join(trauma_df, on='id', how='outer') \
                  .join(context_df, on='id', how='outer')
