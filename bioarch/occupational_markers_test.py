@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
 
+from importlib.resources import open_binary
+import json
+from random import Random
 import unittest
 
 
-from .occupational_markers import EnthesialMarker
+from . import test as bioarch_test
+from .left_right import LeftRight
+from .occupational_markers import EnthesialMarker, OccupationalMarkers
 
 
 class EnthesialMarkerTest(unittest.TestCase):
@@ -69,6 +74,34 @@ class EnthesialMarkerTest(unittest.TestCase):
         self.assertEqual(EnthesialMarker.parse('s3').as_num(), 6.0)
         self.assertEqual(EnthesialMarker.parse('oe0.5').as_num(), 6.5)
         self.assertEqual(EnthesialMarker.parse('oe3').as_num(), 9.0)
+
+
+class OccupationalMarkersTest(unittest.TestCase):
+    def setUp(self):
+        self.random = Random(666)
+
+    def random_em(self):
+        return EnthesialMarker.parse(self.random.choice((None, 0, 1.5, 3.0, 3.5, 6.5)))
+
+    def test_to_pd_series_values(self):
+        series = OccupationalMarkers(*[LeftRight(self.random_em(), self.random_em()) for _ in range(0, 67)]).to_pd_series(prefix='om_')
+
+        with open_binary(bioarch_test, 'OccupationalMarkersTest.test_to_pd_series_values.json') as json_stream:
+            expected_json = json.load(json_stream)
+
+        actual_json = json.loads(series.to_json())
+
+        self.assertEqual(actual_json, expected_json)
+
+    def test_to_pd_series_empty(self):
+        series = OccupationalMarkers.empty().to_pd_series(prefix='om_')
+
+        with open_binary(bioarch_test, 'OccupationalMarkersTest.test_to_pd_series_empty.json') as json_stream:
+            expected_json = json.load(json_stream)
+
+        actual_json = json.loads(series.to_json())
+
+        self.assertEqual(actual_json, expected_json)
 
 
 def main():

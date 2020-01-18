@@ -196,16 +196,15 @@ class OccupationalMarkers(object):  # pylint: disable=R0902
         values = []
         for key, value in self.__dict__.items():
             labels.append(f'{prefix}{key}_left')
-            values.append(value.left)
+            values.append(value.left.as_num() if value.left else None)
             labels.append(f'{prefix}{key}_right')
-            values.append(value.right)
+            values.append(value.right.as_num() if value.right else None)
             labels.append(f'{prefix}{key}_avg')
-            values.append(value.avg())
-            labels.append(f'{prefix}{key}_avg_val')
-            values.append(None if value.avg() is None else value.avg().as_num())
+            value_avg = value.avg()
+            values.append(value_avg.as_num() if value_avg else None)
         s = pd.Series(values, index=labels, copy=True)
 
-        subset = pd.Series([v.as_num() for k, v in s.items() if v is not None and k.endswith('_avg')])
+        subset = pd.Series([v for k, v in s.items() if v is not None and k.endswith('_avg')])
         s = s.append(pd.Series([subset.mean(skipna=True)], index=[f'{prefix}mean']))
         s = s.append(pd.Series([subset.max(skipna=True)], index=[f'{prefix}max']))
         s = s.append(pd.Series([subset.min(skipna=True)], index=[f'{prefix}min']))
