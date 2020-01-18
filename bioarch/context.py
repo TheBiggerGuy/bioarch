@@ -67,16 +67,45 @@ class CompassBearing(Enum):
         return CategoricalDtype(categories=[s.name for s in CompassBearing], ordered=True)
 
 
-def parse_value(value):
-    if value is None:
-        return None
-    if isinstance(value, str) and value.upper() == 'NA':
-        return None
-    if value in (1, '1'):
-        return True
-    if value in (0, '0'):
-        return False
-    raise ValueError(f'Failed to parse Boolean value "{value}" for context')
+@functools.total_ordering
+@enum.unique
+class Present(Enum):
+    NOT_PRESENT = 0
+    PRESENT     = 1  # noqa: E221
+
+    @staticmethod
+    def parse(value: Any) -> Optional['Present']:
+        if value is None:
+            return None
+        if isinstance(value, str) and value.upper() == 'NA':
+            return None
+        if type(value) == Present:  # pylint: disable=C0123
+            return cast(Present, value)
+        if value in (0, 0.0, '0', False):
+            return Present.NOT_PRESENT
+        if value in (1, 1.0, '1', True):
+            return Present.PRESENT
+        raise ValueError(f'Failed to parse {Present.__name__}: "{value}"')
+
+    def __lt__(self, other):
+        if other is None:
+            return False
+        if isinstance(other, int):
+            other = Present(other)
+        if type(other) != type(self):  # pylint: disable=C0123
+            logger.warning('Attempt to compare: %s with %s', self, other)
+            raise NotImplementedError
+        return (self.value < other.value)  # pylint: disable=C0325,W0143
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self}'
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def dtype():
+        return CategoricalDtype(categories=[s.name for s in Present], ordered=True)
 
 
 def parse_position(value):
@@ -123,7 +152,7 @@ class Context(object):
             raise ValueError(f'Invalid body_orientation: "{body_orientation}"')
         self.body_orientation = body_orientation
 
-        self.tags = {k: parse_value(v) for k, v in tags.items()}
+        self.tags = {k.lower(): Present.parse(v) for k, v in tags.items()}
 
     @staticmethod
     def empty():
@@ -138,32 +167,31 @@ class Context(object):
                 groups.add(group_name)
         return groups
 
-    def _to_pd_series(self, prefix, tags, include_all=False):  # pylint: disable=R0201
-        labels = [f'{prefix}{label}' for label in tags.keys()]
-        all_data = pd.Series([val for val in tags.values()], index=labels, copy=True)  # pylint: disable=R1721
-        
-        result = pd.Series([all_data.max()], index=[f'{prefix}present'])
-        if include_all:
-            result = all_data.append(result)
-        return result
-
     def to_pd_data_frame(self, index):
-        simple_data = {
+        data = {
             'id': pd.Series([index]),
             'body_position': pd.Series([self.body_position]),
         }
 
-        #if self.body_orientation:
-        simple_data['body_orientation_cat'] = pd.Series([self.body_orientation.name if self.body_orientation else None], copy=True, dtype=CompassBearing.dtype())
-        simple_data['body_orientation_val'] = pd.Series([self.body_orientation.value if self.body_orientation else None], copy=True, dtype='Int64')
+        data['body_orientation_cat'] = pd.Series([self.body_orientation.name if self.body_orientation else None], copy=True, dtype=CompassBearing.dtype())
+        data['body_orientation_val'] = pd.Series([self.body_orientation.value if self.body_orientation else None], copy=True, dtype='Int64')
 
-        group_series = []
-        group_series.append(self._to_pd_series(f'all_', self.tags, include_all=True))
+        for key, value in self.tags.items():
+            data[f'all_{key}_cat'] = pd.Series([value.name if value else None], copy=True, dtype=Present.dtype())
+            data[f'all_{key}_val'] = pd.Series([value.value if value else None], copy=True, dtype='Int64')
+
         for group_name, group in KNOWN_GROUPS.items():
-            group_series.append(self._to_pd_series(f'{group_name}_', {k: v for k, v in self.tags.items() if k.lower() in group}))
-        groups_df = pd.DataFrame.from_dict({index: pd.concat(group_series)}, orient='index')
+            status_set = {v for k, v in self.tags.items() if k in group and v}
+            if Present.PRESENT in status_set:
+                present = Present.PRESENT
+            elif Present.NOT_PRESENT in status_set:
+                present = Present.NOT_PRESENT
+            else:
+                present = None
+            data[f'{group_name}_cat'] = pd.Series([present.name if present else None], copy=True, dtype=Present.dtype())
+            data[f'{group_name}_val'] = pd.Series([present.value if present else None], copy=True, dtype='Int64')
 
-        return pd.DataFrame.from_dict(simple_data).set_index('id').join(groups_df, on='id', how='outer')
+        return pd.DataFrame.from_dict(data).set_index('id')
 
 
 if __name__ == "__main__":

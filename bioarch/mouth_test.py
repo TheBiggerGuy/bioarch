@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
 
+from importlib.resources import open_binary
+import json
 from random import Random
 import unittest
 
 
+from . import test as bioarch_test
 from .mouth import Mouth, Tooth
 
 
@@ -55,14 +58,26 @@ class MouthTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             Mouth([Tooth.empty()] * 33)
 
-    def test_to_pd_series(self):
+    def test_to_pd_series_values(self):
         random = Random(666)
         series = Mouth([Tooth('A', '2', 'NA', '0', random.choice(('NA', '0', '1'))) for _ in range(0, 32)]).to_pd_series()
 
-        self.assertRegex(series.to_json(), '^{"all_number_of_teeth":32,"all_tooth_0_tooth":"A",".*}$')
-        self.assertRegex(series.to_json(), '.*"incisors_abcess_mean":0.6666666667,"incisors_abcess_max":true,"incisors_abcess_min":false,"incisors_abcess_count":6}$')
+        with open_binary(bioarch_test, 'MouthTest.test_to_pd_series_values.json') as json_stream:
+            expected_json = json.load(json_stream)
+
+        actual_json = json.loads(series.to_json())
+
+        self.assertEqual(actual_json, expected_json)
+
+    def test_to_pd_series_empty(self):
         series = Mouth.empty().to_pd_series(prefix='mouth_')
-        self.assertTrue(series.to_json().startswith('{"mouth_all_number_of_teeth":0,"mouth_all_tooth_0_tooth":"NA","'))
+
+        with open_binary(bioarch_test, 'MouthTest.test_to_pd_series_empty.json') as json_stream:
+            expected_json = json.load(json_stream)
+
+        actual_json = json.loads(series.to_json())
+
+        self.assertEqual(actual_json, expected_json)
 
 
 def main():
