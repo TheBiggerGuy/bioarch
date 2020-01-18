@@ -133,9 +133,9 @@ class Joints(object):  # pylint: disable=R0902
 
         for prefix, cols in summary_stats.items():
             subset_df = per_joint_df[cols]
-            per_joint_df[f'{prefix}_mean'] = subset_df.mean(axis=1)
-            per_joint_df[f'{prefix}_max'] = subset_df.max(axis=1)
-            per_joint_df[f'{prefix}_min'] = subset_df.min(axis=1)
+            per_joint_df[f'{prefix}_mean'] = subset_df.mean(axis=1).astype(JointCondition.dtype())
+            per_joint_df[f'{prefix}_max'] = subset_df.max(axis=1).astype(JointCondition.dtype())
+            per_joint_df[f'{prefix}_min'] = subset_df.min(axis=1).astype(JointCondition.dtype())
             per_joint_df[f'{prefix}_count'] = subset_df.count(axis=1)
 
         return per_joint_df
