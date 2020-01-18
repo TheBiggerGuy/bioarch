@@ -127,7 +127,7 @@ class Joints(object):  # pylint: disable=R0902
             return None
         return condition.name
 
-    def _to_pd_series(self, subset_of_self, prefix):  # pylint: disable=R0201
+    def _to_pd_series(self, subset_of_self, prefix, include_all=False):  # pylint: disable=R0201
         labels = []
         values = []
         for key, value in subset_of_self.items():
@@ -143,14 +143,19 @@ class Joints(object):  # pylint: disable=R0902
                 values.append(Joints._to_pd_value(value))
                 labels.append(f'{prefix}{key}_avg')
                 values.append(Joints._to_pd_value(value))
-        s = pd.Series(values, index=labels, copy=True)
+        per_joint = pd.Series(values, index=labels, copy=True)
 
-        subset = pd.Series([JointCondition.parse(v).value for k, v in s.items() if not is_none_or_na(v) and k.endswith('_avg')])
-        s = s.append(pd.Series([subset.mean(skipna=True)], index=[f'{prefix}mean']))
-        s = s.append(pd.Series([subset.max(skipna=True)], index=[f'{prefix}max']))
-        s = s.append(pd.Series([subset.min(skipna=True)], index=[f'{prefix}min']))
-        s = s.append(pd.Series([subset.count()], index=[f'{prefix}count']))
-        return s
+        subset = pd.Series([JointCondition.parse(v).value for k, v in per_joint.items() if not is_none_or_na(v) and k.endswith('_avg')])
+        summaray = pd.Series([])
+        summaray = summaray.append(pd.Series([subset.mean(skipna=True)], index=[f'{prefix}mean']))
+        summaray = summaray.append(pd.Series([subset.max(skipna=True)], index=[f'{prefix}max']))
+        summaray = summaray.append(pd.Series([subset.min(skipna=True)], index=[f'{prefix}min']))
+        summaray = summaray.append(pd.Series([subset.count()], index=[f'{prefix}count']))
+
+        result = summaray
+        if include_all:
+            result = per_joint.append(result)
+        return result
 
     def to_pd_data_frame(self, index):
         data = {
@@ -158,7 +163,7 @@ class Joints(object):  # pylint: disable=R0902
         }
         df = pd.DataFrame.from_dict(data).set_index('id')
 
-        s =  pd.concat([self._to_pd_series({k: v for k, v in self.__dict__.items()}, 'all_'),  # pylint: disable=R1721
+        s =  pd.concat([self._to_pd_series({k: v for k, v in self.__dict__.items()}, 'all_', include_all=True),  # pylint: disable=R1721
                         self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('c')}, 'cervical_'),
                         self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('t')}, 'thoracic_'),
                         self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('l')}, 'lumbar_')])
