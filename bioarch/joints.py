@@ -9,6 +9,7 @@ from statistics import mean
 
 
 import pandas as pd
+from pandas.api.types import CategoricalDtype
 
 
 from .left_right import LeftRight
@@ -17,19 +18,10 @@ from .left_right import LeftRight
 logger = logging.getLogger(__name__)
 
 
-def is_none_or_na(condition):
-    if condition is None:
-        return True
-    if isinstance(condition, LeftRight):
-        return is_none_or_na(condition.avg())
-    return condition == JointCondition.NOT_PRESENT
-
-
 @functools.total_ordering
 @enum.unique
 class JointCondition(Enum):
     """
-    NA- does not exist
     1 - slight/mild
     2 - medium
     3 - extreme
@@ -37,7 +29,6 @@ class JointCondition(Enum):
     5 - SCHMORALS NODES
     6 - FRACTURE
     """
-    NOT_PRESENT     = -1  # noqa: E221,E222
     NORMAL          =  0  # noqa: E221,E222
     MILD            =  1  # noqa: E221,E222
     MEDIUM          =  2  # noqa: E221,E222
@@ -63,29 +54,25 @@ class JointCondition(Enum):
             if value == str(condition.value):
                 return condition
         if value in ('NA', 'N'):
-            return JointCondition.NOT_PRESENT
+            return None
         logger.error('Failed to parse JointCondition: "%s"', value)
         raise ValueError
 
     @staticmethod
     def avg(left, right):
-        if left in (None, JointCondition.NOT_PRESENT):
+        if left is None:
             return right
-        if right in (None, JointCondition.NOT_PRESENT):
+        if right is None:
             return left
         return JointCondition(int(mean((left.value, right.value))))
 
     def __lt__(self, other):
         if other is None:
             return False
-        if other == float('inf'):
-            return True
-        if other == float('-inf'):
-            return False
         if isinstance(other, int):
             other = JointCondition(other)
         if type(other) != type(self):  # pylint: disable=C0123
-            logger.warning('Attempt to compare: %s (%s) with %s (%s)', self, type(self), other, type(other))
+            logger.warning('Attempt to compare: %s with %s', self, other)
             raise NotImplementedError
         return (self.value < other.value)  # pylint: disable=C0325,W0143
 
@@ -94,6 +81,10 @@ class JointCondition(Enum):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def dtype():
+        return CategoricalDtype(categories=[s.name for s in JointCondition], ordered=True)
 
 
 class Joints(object):  # pylint: disable=R0902
@@ -115,61 +106,39 @@ class Joints(object):  # pylint: disable=R0902
 
     @staticmethod
     def empty():
-        args = [LeftRight(JointCondition.NOT_PRESENT, JointCondition.NOT_PRESENT)] * 6
-        args += [JointCondition.NOT_PRESENT] * 7
+        args = [LeftRight(None, None)] * 6
+        args += [None] * 7
         return Joints(*args)
 
-    @staticmethod
-    def _to_pd_value(condition: JointCondition):
-        if condition is None:
-            return None
-        if condition == JointCondition.NOT_PRESENT:
-            return None
-        return condition.name
-
-    def _to_pd_series(self, subset_of_self, prefix, include_all=False):  # pylint: disable=R0201
-        labels = []
-        values = []
-        for key, value in subset_of_self.items():
-            if isinstance(value, LeftRight):
-                labels.append(f'{prefix}{key}_left')
-                values.append(Joints._to_pd_value(value.left))
-                labels.append(f'{prefix}{key}_right')
-                values.append(Joints._to_pd_value(value.right))
-                labels.append(f'{prefix}{key}_avg')
-                values.append(Joints._to_pd_value(value.avg()))
-            else:
-                labels.append(f'{prefix}{key}')
-                values.append(Joints._to_pd_value(value))
-                labels.append(f'{prefix}{key}_avg')
-                values.append(Joints._to_pd_value(value))
-        per_joint = pd.Series(values, index=labels, copy=True)
-
-        subset = pd.Series([JointCondition.parse(v).value for k, v in per_joint.items() if not is_none_or_na(v) and k.endswith('_avg')])
-        summaray = pd.Series([])
-        summaray = summaray.append(pd.Series([subset.mean(skipna=True)], index=[f'{prefix}mean']))
-        summaray = summaray.append(pd.Series([subset.max(skipna=True)], index=[f'{prefix}max']))
-        summaray = summaray.append(pd.Series([subset.min(skipna=True)], index=[f'{prefix}min']))
-        summaray = summaray.append(pd.Series([subset.count()], index=[f'{prefix}count']))
-
-        result = summaray
-        if include_all:
-            result = per_joint.append(result)
-        return result
-
     def to_pd_data_frame(self, index):
-        data = {
+        per_joint = {
             'id': pd.Series([index]),
         }
-        df = pd.DataFrame.from_dict(data).set_index('id')
+        for key, value in self.__dict__.items():
+            if isinstance(value, LeftRight):
+                per_joint[f'{key}_left'] = pd.Series([value.left.name if value.left else None], copy=True, dtype=JointCondition.dtype())
+                per_joint[f'{key}_right'] = pd.Series([value.right.name if value.right else None], copy=True, dtype=JointCondition.dtype())
+                avg = value.avg()
+                per_joint[f'{key}_avg'] = pd.Series([avg.name if avg else None], copy=True, dtype=JointCondition.dtype())
+            else:
+                per_joint[f'{key}'] = pd.Series([value.name if value else None], copy=True, dtype=JointCondition.dtype())
+        per_joint_df = pd.DataFrame.from_dict(per_joint).set_index('id')
 
-        s =  pd.concat([self._to_pd_series({k: v for k, v in self.__dict__.items()}, 'all_', include_all=True),  # pylint: disable=R1721
-                        self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('c')}, 'cervical_'),
-                        self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('t')}, 'thoracic_'),
-                        self._to_pd_series({k: v for k, v in self.__dict__.items() if k.startswith('l')}, 'lumbar_')])
-        joint_df = pd.DataFrame.from_dict({index: s}, orient='index')
+        summary_stats = {
+            'all': [c for c in per_joint_df.columns if not c.endswith('_avg') and c != 'id'],
+            'cervical': ['c1_3', 'c4_7'],
+            'thoracic': ['t1_4', 't5_8', 't9_12'],
+            'lumbar': ['l1_5'],
+        }
 
-        return df.join(joint_df, on='id', how='outer')
+        for prefix, cols in summary_stats.items():
+            subset_df = per_joint_df[cols]
+            per_joint_df[f'{prefix}_mean'] = subset_df.mean(axis=1)
+            per_joint_df[f'{prefix}_max'] = subset_df.max(axis=1)
+            per_joint_df[f'{prefix}_min'] = subset_df.min(axis=1)
+            per_joint_df[f'{prefix}_count'] = subset_df.count(axis=1)
+
+        return per_joint_df
 
 
 if __name__ == "__main__":
