@@ -81,9 +81,12 @@ class Present(Enum):
             return None
         if type(value) == Present:  # pylint: disable=C0123
             return cast(Present, value)
-        if value in (0, 0.0, '0', False):
+        if isinstance(value, bool):
+            return Present.PRESENT if value else Present.NOT_PRESENT
+        value = float(value)
+        if value == 0.0:
             return Present.NOT_PRESENT
-        if value in (1, 1.0, '1', True):
+        if value > 0.0:
             return Present.PRESENT
         raise ValueError(f'Failed to parse {Present.__name__}: "{value}"')
 
@@ -184,6 +187,9 @@ class Context(object):
 
         self.tags = {k.lower(): Present.parse(v) for k, v in tags.items()}
 
+        countable_goods = [int(v) for v in tags.values() if Present.parse(v) is not None]
+        self.total = sum(countable_goods) if len(countable_goods) > 0 else None
+
     @staticmethod
     def empty():
         return Context(None, None, {})
@@ -222,6 +228,8 @@ class Context(object):
                 present = None
             data[f'{group_name}_cat'] = pd.Series([present.name if present else None], copy=True, dtype=Present.dtype())
             data[f'{group_name}_val'] = pd.Series([present.value if present else None], copy=True, dtype='Int64')
+
+        data['total_grave_goods'] = pd.Series([self.total], copy=True, dtype='Int64')
 
         return pd.DataFrame.from_dict(data).set_index('id')
 
