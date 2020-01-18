@@ -3,6 +3,11 @@ test-reports/
 
 # Local testing
 py37_env/
+py37venv/
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
