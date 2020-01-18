@@ -47,11 +47,12 @@ class AgeSexStatureTest(unittest.TestCase):
 
         ass = AgeSexStature(os, age, femur, humerus, tibia, stature, body_mass)
 
-        df = ass.to_pd_data_frame('id1', prefix='ass_')
+        df = ass.to_pd_data_frame('id1')
 
         with open_binary(bioarch_test, 'AgeSexStatureTest.test_to_pd_series.json') as json_stream:
             expected_json = json.load(json_stream)
 
+        print(df.to_json(orient='records'))
         actual_json = json.loads(df.to_json(orient='records'))
 
         self.assertEqual(expected_json, actual_json)
@@ -111,6 +112,7 @@ class IndividualTest(unittest.TestCase):
         with open_binary(bioarch_test, 'IndividualTest.test_to_pd_data_frame.json') as json_stream:
             expected_json = json.load(json_stream)
 
+        print(df.to_json(orient='records'))
         actual_json = json.loads(df.to_json(orient='records'))
 
         self.assertEqual(actual_json, expected_json)

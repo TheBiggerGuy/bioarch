@@ -191,25 +191,25 @@ class OccupationalMarkers(object):  # pylint: disable=R0902
         markers: List[LeftRight[EnthesialMarker]] = [LeftRight(None, None)] * 67
         return OccupationalMarkers(*markers)
 
-    def to_pd_series(self, prefix: str = '') -> pd.Series:
-        labels = []
-        values = []
+    def to_pd_data_frame(self, index) -> pd.Series:
+        data = {
+            'id': pd.Series([index]),
+        }
         for key, value in self.__dict__.items():
-            labels.append(f'{prefix}{key}_left')
-            values.append(value.left.as_num() if value.left else None)
-            labels.append(f'{prefix}{key}_right')
-            values.append(value.right.as_num() if value.right else None)
-            labels.append(f'{prefix}{key}_avg')
+            data[f'{key}_left'] = value.left.as_num() if value.left else None
+            data[f'{key}_right'] = value.right.as_num() if value.right else None
             value_avg = value.avg()
-            values.append(value_avg.as_num() if value_avg else None)
-        s = pd.Series(values, index=labels, copy=True)
+            data[f'{key}_avg'] = value_avg.as_num() if value_avg else None
+        lr_df = pd.DataFrame.from_dict(data).set_index('id')
 
-        subset = pd.Series([v for k, v in s.items() if v is not None and k.endswith('_avg')])
-        s = s.append(pd.Series([subset.mean(skipna=True)], index=[f'{prefix}mean']))
-        s = s.append(pd.Series([subset.max(skipna=True)], index=[f'{prefix}max']))
-        s = s.append(pd.Series([subset.min(skipna=True)], index=[f'{prefix}min']))
-        s = s.append(pd.Series([subset.count()], index=[f'{prefix}count']))
-        return s
+        for side in ('left', 'right', 'avg'):
+            df = lr_df[[c for c in lr_df.columns if c.endswith(f'_{side}')]].copy()
+            lr_df[f'min_{side}'] = df.min(axis=1)
+            lr_df[f'max_{side}'] = df.max(axis=1)
+            lr_df[f'mean_{side}'] = df.mean(axis=1)
+            lr_df[f'count_{side}'] = df.count(axis=1)
+
+        return lr_df
 
 
 if __name__ == "__main__":

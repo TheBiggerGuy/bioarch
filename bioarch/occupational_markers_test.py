@@ -83,23 +83,25 @@ class OccupationalMarkersTest(unittest.TestCase):
     def random_em(self):
         return EnthesialMarker.parse(self.random.choice((None, 0, 1.5, 3.0, 3.5, 6.5)))
 
-    def test_to_pd_series_values(self):
-        series = OccupationalMarkers(*[LeftRight(self.random_em(), self.random_em()) for _ in range(0, 67)]).to_pd_series(prefix='om_')
+    def test_to_pd_data_frame_values(self):
+        df = OccupationalMarkers(*[LeftRight(self.random_em(), self.random_em()) for _ in range(0, 67)]).to_pd_data_frame('id1')
 
-        with open_binary(bioarch_test, 'OccupationalMarkersTest.test_to_pd_series_values.json') as json_stream:
+        with open_binary(bioarch_test, 'OccupationalMarkersTest.test_to_pd_data_frame_values.json') as json_stream:
             expected_json = json.load(json_stream)
 
-        actual_json = json.loads(series.to_json())
+        print(df.to_json(orient='records'))
+        actual_json = json.loads(df.to_json(orient='records'))
 
         self.assertEqual(actual_json, expected_json)
 
-    def test_to_pd_series_empty(self):
-        series = OccupationalMarkers.empty().to_pd_series(prefix='om_')
+    def test_to_pd_data_frame_empty(self):
+        df = OccupationalMarkers.empty().to_pd_data_frame('id1')
 
-        with open_binary(bioarch_test, 'OccupationalMarkersTest.test_to_pd_series_empty.json') as json_stream:
+        with open_binary(bioarch_test, 'OccupationalMarkersTest.test_to_pd_data_frame_empty.json') as json_stream:
             expected_json = json.load(json_stream)
 
-        actual_json = json.loads(series.to_json())
+        print(df.to_json(orient='records'))
+        actual_json = json.loads(df.to_json(orient='records'))
 
         self.assertEqual(actual_json, expected_json)
 
