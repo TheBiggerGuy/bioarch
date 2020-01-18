@@ -7,7 +7,23 @@ import unittest
 from pandas.api.types import CategoricalDtype
 
 
-from .context import CompassBearing, Context, Present
+from .context import BodyPosition, CompassBearing, Context, Present
+
+
+class BodyPositionTest(unittest.TestCase):
+    def test_parse(self):
+        self.assertEqual(BodyPosition.parse('SUPINE'), BodyPosition.SUPINE)
+        self.assertEqual(BodyPosition.parse('supine'), BodyPosition.SUPINE)
+
+        self.assertEqual(BodyPosition.parse(0), BodyPosition.SUPINE)
+        self.assertEqual(BodyPosition.parse(1), BodyPosition.SUPINE_FIXED_LEGS)
+        self.assertEqual(BodyPosition.parse(2), BodyPosition.CROUCHED)
+        self.assertEqual(BodyPosition.parse(3), BodyPosition.CROUCHED_LEFT_SIDE)
+        self.assertEqual(BodyPosition.parse(4), BodyPosition.CROUCHED_RIGHT_SIDE)
+        self.assertEqual(BodyPosition.parse(5), BodyPosition.STOMACH)
+
+        self.assertEqual(BodyPosition.parse('NA'), None)
+        self.assertEqual(BodyPosition.parse(None), None)
 
 
 class CompassBearingTest(unittest.TestCase):
@@ -34,13 +50,11 @@ class CompassBearingTest(unittest.TestCase):
 
 class ContextTest(unittest.TestCase):
     def test_constructor_position(self):
-        self.assertEqual(Context(0, None, {}).body_position, 'supine')
-
+        self.assertEqual(Context(BodyPosition.SUPINE, None, {}).body_position, BodyPosition.SUPINE, None)
         self.assertEqual(Context(None, None, {}).body_position, None)
-        self.assertEqual(Context('NA', None, {}).body_position, None)
 
         with self.assertRaises(ValueError):
-            Context('foo', None, {})
+            Context('SUPINE', None, {})
 
     def test_constructor_orientation(self):
         self.assertEqual(Context(None, CompassBearing.NORTH, {}).body_orientation, CompassBearing.NORTH)
@@ -66,7 +80,7 @@ class ContextTest(unittest.TestCase):
             Context(None, None, {'spear': 10})
 
     def test_to_pd_data_frame(self):
-        context = Context(1,
+        context = Context(BodyPosition.SUPINE,
                           CompassBearing.NORTH,
                           {'spear': True,
                            'comb': 'NA',
@@ -74,22 +88,25 @@ class ContextTest(unittest.TestCase):
 
         df = context.to_pd_data_frame('id1')
 
+        self.assertIsInstance(df['body_position_cat'].dtypes, CategoricalDtype)
         self.assertIsInstance(df['body_orientation_cat'].dtypes, CategoricalDtype)
         self.assertIsInstance(df['all_spear_cat'].dtypes, CategoricalDtype)
         self.assertIsInstance(df['weapons_cat'].dtypes, CategoricalDtype)
-        self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","body_orientation_cat":"NORTH","body_orientation_val":0,"all_spear_cat":"PRESENT","all_spear_val":1,"all_comb_cat":null,"all_comb_val":null,"all_knife_cat":null,"all_knife_val":null,"utilitarian_cat":null,"utilitarian_val":null,"textile_cat":null,"textile_val":null,"equestrian_cat":null,"equestrian_val":null,"economic_cat":null,"economic_val":null,"organic_material_cat":null,"organic_material_val":null,"appearance_cat":null,"appearance_val":null,"burial_container_cat":null,"burial_container_val":null,"weapons_cat":"PRESENT","weapons_val":1,"iron_fragment_cat":null,"iron_fragment_val":null,"miscellaneous_cat":null,"miscellaneous_val":null}]')
+        self.assertEqual(df.to_json(orient='records'), '[{"body_position_cat":"SUPINE","body_position_val":0,"body_orientation_cat":"NORTH","body_orientation_val":0,"all_spear_cat":"PRESENT","all_spear_val":1,"all_comb_cat":null,"all_comb_val":null,"all_knife_cat":null,"all_knife_val":null,"utilitarian_cat":null,"utilitarian_val":null,"textile_cat":null,"textile_val":null,"equestrian_cat":null,"equestrian_val":null,"economic_cat":null,"economic_val":null,"organic_material_cat":null,"organic_material_val":null,"appearance_cat":null,"appearance_val":null,"burial_container_cat":null,"burial_container_val":null,"weapons_cat":"PRESENT","weapons_val":1,"iron_fragment_cat":null,"iron_fragment_val":null,"miscellaneous_cat":null,"miscellaneous_val":null}]')
 
-        context = Context(1,
+        context = Context(None,
                           None,
                           {'spear': True,
                            'comb': 'NA',
                            'knife': None})
 
         df = context.to_pd_data_frame('id1')
+
+        self.assertIsInstance(df['body_position_cat'].dtypes, CategoricalDtype)
         self.assertIsInstance(df['body_orientation_cat'].dtypes, CategoricalDtype)
         self.assertIsInstance(df['all_comb_cat'].dtypes, CategoricalDtype)
         self.assertIsInstance(df['appearance_cat'].dtypes, CategoricalDtype)
-        self.assertEqual(df.to_json(orient='records'), '[{"body_position":"supine with flexed legs","body_orientation_cat":null,"body_orientation_val":null,"all_spear_cat":"PRESENT","all_spear_val":1,"all_comb_cat":null,"all_comb_val":null,"all_knife_cat":null,"all_knife_val":null,"utilitarian_cat":null,"utilitarian_val":null,"textile_cat":null,"textile_val":null,"equestrian_cat":null,"equestrian_val":null,"economic_cat":null,"economic_val":null,"organic_material_cat":null,"organic_material_val":null,"appearance_cat":null,"appearance_val":null,"burial_container_cat":null,"burial_container_val":null,"weapons_cat":"PRESENT","weapons_val":1,"iron_fragment_cat":null,"iron_fragment_val":null,"miscellaneous_cat":null,"miscellaneous_val":null}]')
+        self.assertEqual(df.to_json(orient='records'), '[{"body_position_cat":null,"body_position_val":null,"body_orientation_cat":null,"body_orientation_val":null,"all_spear_cat":"PRESENT","all_spear_val":1,"all_comb_cat":null,"all_comb_val":null,"all_knife_cat":null,"all_knife_val":null,"utilitarian_cat":null,"utilitarian_val":null,"textile_cat":null,"textile_val":null,"equestrian_cat":null,"equestrian_val":null,"economic_cat":null,"economic_val":null,"organic_material_cat":null,"organic_material_val":null,"appearance_cat":null,"appearance_val":null,"burial_container_cat":null,"burial_container_val":null,"weapons_cat":"PRESENT","weapons_val":1,"iron_fragment_cat":null,"iron_fragment_val":null,"miscellaneous_cat":null,"miscellaneous_val":null}]')
 
     def test_known_context_to_group(self):
         known_context_keys = {'knife': set(['utilitarian']),  # Should not be a weapons

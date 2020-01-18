@@ -108,24 +108,52 @@ class Present(Enum):
         return CategoricalDtype(categories=[s.name for s in Present], ordered=True)
 
 
-def parse_position(value):
-    if value is None:
-        return None
-    if isinstance(value, str) and value.upper() == 'NA':
-        return None
-    if value in ('0', 0):
-        return 'supine'
-    if value in ('1', 1):
-        return 'supine with flexed legs'
-    if value in ('2', 2):
-        return 'crouched'
-    if value in ('3', 3):
-        return 'crouched on left side'
-    if value in ('4', 4):
-        return 'crouched on right side'
-    if value in ('5', 5):
-        return 'laid on their stomach'
-    raise ValueError(f'Failed to parse position value "{value}" for context')
+@functools.total_ordering
+@enum.unique
+class BodyPosition(Enum):
+    SUPINE              = 0  # noqa: E221
+    SUPINE_FIXED_LEGS   = 1  # noqa: E221
+    CROUCHED            = 2  # noqa: E221
+    CROUCHED_LEFT_SIDE  = 3  # noqa: E221
+    CROUCHED_RIGHT_SIDE = 4
+    STOMACH             = 5  # noqa: E221
+
+    @staticmethod
+    def parse(value: Any) -> Optional['BodyPosition']:
+        if value is None:
+            return None
+        if isinstance(value, str) and value.upper() == 'NA':
+            return None
+        if type(value) == BodyPosition:  # pylint: disable=C0123
+            return cast(BodyPosition, value)
+        if isinstance(value, str):
+            value = value.upper()
+        for position in BodyPosition:
+            if value == position.name:
+                return position
+            if value == position.value:
+                return position
+        raise ValueError(f'Failed to parse {BodyPosition.__name__}: "{value}"')
+
+    def __lt__(self, other):
+        if other is None:
+            return False
+        if isinstance(other, int):
+            other = BodyPosition(other)
+        if type(other) != type(self):  # pylint: disable=C0123
+            logger.warning('Attempt to compare: %s with %s', self, other)
+            raise NotImplementedError
+        return (self.value < other.value)  # pylint: disable=C0325,W0143
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self}'
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def dtype():
+        return CategoricalDtype(categories=[s.name for s in BodyPosition], ordered=True)
 
 
 KNOWN_GROUPS = {
@@ -145,8 +173,10 @@ KNOWN_GROUPS = {
 class Context(object):
     """docstring for Context"""
 
-    def __init__(self, body_position, body_orientation: Optional[CompassBearing], tags: Dict[str, Optional[Union[str, int, bool, float]]]):
-        self.body_position = parse_position(body_position)
+    def __init__(self, body_position: Optional[BodyPosition], body_orientation: Optional[CompassBearing], tags: Dict[str, Optional[Union[str, int, bool, float]]]):
+        if body_position is not None and not isinstance(body_position, BodyPosition):
+            raise ValueError(f'Invalid body_position: "{body_position}"')
+        self.body_position = body_position
 
         if body_orientation is not None and not isinstance(body_orientation, CompassBearing):
             raise ValueError(f'Invalid body_orientation: "{body_orientation}"')
@@ -170,8 +200,10 @@ class Context(object):
     def to_pd_data_frame(self, index):
         data = {
             'id': pd.Series([index]),
-            'body_position': pd.Series([self.body_position]),
         }
+
+        data['body_position_cat'] = pd.Series([self.body_position.name if self.body_position else None], copy=True, dtype=BodyPosition.dtype())
+        data['body_position_val'] = pd.Series([self.body_position.value if self.body_position else None], copy=True, dtype='Int64')
 
         data['body_orientation_cat'] = pd.Series([self.body_orientation.name if self.body_orientation else None], copy=True, dtype=CompassBearing.dtype())
         data['body_orientation_val'] = pd.Series([self.body_orientation.value if self.body_orientation else None], copy=True, dtype='Int64')
