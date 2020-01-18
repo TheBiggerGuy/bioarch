@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 
+from importlib.resources import open_binary
+import json
 import unittest
 
 
+from . import test as bioarch_test
 from .joints import is_none_or_na, JointCondition, Joints
 from .left_right import LeftRight
 
@@ -83,9 +86,15 @@ class JointsTest(unittest.TestCase):
         l1_5 = JointCondition.NORMAL
 
         joints = Joints(shoulder, elbow, wrist, hip, knee, ankle, sacro_illiac, c1_3, c4_7, t1_4, t5_8, t9_12, l1_5)
-
         series = joints.to_pd_series()
-        self.assertEqual(series.to_json(), '{"all_shoulder_left":"NORMAL","all_shoulder_right":"NORMAL","all_shoulder_avg":"NORMAL","all_elbow_left":null,"all_elbow_right":null,"all_elbow_avg":null,"all_wrist_left":"NORMAL","all_wrist_right":null,"all_wrist_avg":"NORMAL","all_hip_left":null,"all_hip_right":"NORMAL","all_hip_avg":"NORMAL","all_knee_left":"NORMAL","all_knee_right":"MEDIUM","all_knee_avg":"MILD","all_ankle_left":null,"all_ankle_right":"FRACTURE","all_ankle_avg":"FRACTURE","all_sacro_illiac":"NORMAL","all_sacro_illiac_avg":"NORMAL","all_c1_3":null,"all_c1_3_avg":null,"all_c4_7":"NORMAL","all_c4_7_avg":"NORMAL","all_t1_4":"NORMAL","all_t1_4_avg":"NORMAL","all_t5_8":"NORMAL","all_t5_8_avg":"NORMAL","all_t9_12":"NORMAL","all_t9_12_avg":"NORMAL","all_l1_5":"NORMAL","all_l1_5_avg":"NORMAL","all_mean":0.6363636364,"all_max":6,"all_min":0,"all_count":11,"cervical_c1_3":null,"cervical_c1_3_avg":null,"cervical_c4_7":"NORMAL","cervical_c4_7_avg":"NORMAL","cervical_mean":0.0,"cervical_max":0,"cervical_min":0,"cervical_count":1,"thoracic_t1_4":"NORMAL","thoracic_t1_4_avg":"NORMAL","thoracic_t5_8":"NORMAL","thoracic_t5_8_avg":"NORMAL","thoracic_t9_12":"NORMAL","thoracic_t9_12_avg":"NORMAL","thoracic_mean":0.0,"thoracic_max":0,"thoracic_min":0,"thoracic_count":3,"lumbar_l1_5":"NORMAL","lumbar_l1_5_avg":"NORMAL","lumbar_mean":0.0,"lumbar_max":0,"lumbar_min":0,"lumbar_count":1}')
+
+        with open_binary(bioarch_test, 'JointsTest.test_to_pd_series.json') as json_stream:
+            expected_json = json.load(json_stream)
+
+        print(series.to_json())
+        actual_json = json.loads(series.to_json())
+
+        self.assertEqual(actual_json, expected_json)
 
     def test_is_none_or_na(self):
         self.assertEqual(is_none_or_na(None), True)
