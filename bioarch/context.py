@@ -5,7 +5,7 @@ import enum
 from enum import Enum
 import functools
 import logging
-from typing import Any, cast, Dict, Optional, Union
+from typing import Any, cast, Dict, Optional
 
 
 import pandas as pd
@@ -176,7 +176,7 @@ KNOWN_GROUPS = {
 class Context(object):
     """docstring for Context"""
 
-    def __init__(self, body_position: Optional[BodyPosition], body_orientation: Optional[CompassBearing], tags: Dict[str, Optional[Union[str, int, bool, float]]]):
+    def __init__(self, body_position: Optional[BodyPosition], body_orientation: Optional[CompassBearing], disturbed: Optional[Present], decapitation: Optional[Present], double_grave: Optional[Present], stone_layer: Optional[Present], grave_goods: Dict[str, Optional[Any]]):
         if body_position is not None and not isinstance(body_position, BodyPosition):
             raise ValueError(f'Invalid body_position: "{body_position}"')
         self.body_position = body_position
@@ -185,14 +185,19 @@ class Context(object):
             raise ValueError(f'Invalid body_orientation: "{body_orientation}"')
         self.body_orientation = body_orientation
 
-        self.tags = {k.lower(): Present.parse(v) for k, v in tags.items()}
+        self.disturbed = disturbed
+        self.decapitation = decapitation
+        self.double_grave = double_grave
+        self.stone_layer = stone_layer
 
-        countable_goods = [int(v) for v in tags.values() if Present.parse(v) is not None]
+        self.grave_goods = {k.lower(): Present.parse(v) for k, v in grave_goods.items()}
+
+        countable_goods = [float(v) for v in grave_goods.values() if Present.parse(v) is not None]  # type: ignore
         self.total = sum(countable_goods) if len(countable_goods) > 0 else None
 
     @staticmethod
     def empty():
-        return Context(None, None, {})
+        return Context(None, None, None, None, None, None, {})
 
     @staticmethod
     def group(value):
@@ -214,12 +219,17 @@ class Context(object):
         data['body_orientation_cat'] = pd.Series([self.body_orientation.name if self.body_orientation else None], copy=True, dtype=CompassBearing.dtype())
         data['body_orientation_val'] = pd.Series([self.body_orientation.value if self.body_orientation else None], copy=True, dtype='Int64')
 
-        for key, value in self.tags.items():
+        data['disturbed_cat'] = pd.Series([self.disturbed.name if self.disturbed else None], copy=True, dtype=Present.dtype())
+        data['decapitation_cat'] = pd.Series([self.decapitation.name if self.decapitation else None], copy=True, dtype=Present.dtype())
+        data['double_grave_cat'] = pd.Series([self.double_grave.name if self.double_grave else None], copy=True, dtype=Present.dtype())
+        data['stone_layer_cat'] = pd.Series([self.stone_layer.name if self.stone_layer else None], copy=True, dtype=Present.dtype())
+
+        for key, value in self.grave_goods.items():
             data[f'all_{key}_cat'] = pd.Series([value.name if value else None], copy=True, dtype=Present.dtype())
             data[f'all_{key}_val'] = pd.Series([value.value if value else None], copy=True, dtype='Int64')
 
         for group_name, group in KNOWN_GROUPS.items():
-            status_set = {v for k, v in self.tags.items() if k in group and v}
+            status_set = {v for k, v in self.grave_goods.items() if k in group and v}
             if Present.PRESENT in status_set:
                 present = Present.PRESENT
             elif Present.NOT_PRESENT in status_set:
