@@ -193,7 +193,7 @@ class Context(object):
         self.grave_goods = {k.lower(): Present.parse(v) for k, v in grave_goods.items()}
 
         countable_goods = [float(v) for v in grave_goods.values() if Present.parse(v) is not None]  # type: ignore
-        self.total = sum(countable_goods) if len(countable_goods) > 0 else None
+        self.grave_goods_total = sum(countable_goods) if len(countable_goods) > 0 else None
 
     @staticmethod
     def empty():
@@ -228,18 +228,22 @@ class Context(object):
             data[f'all_{key}_cat'] = pd.Series([value.name if value else None], copy=True, dtype=Present.dtype())
             data[f'all_{key}_val'] = pd.Series([value.value if value else None], copy=True, dtype='Int64')
 
+        per_group_count = None
         for group_name, group in KNOWN_GROUPS.items():
             status_set = {v for k, v in self.grave_goods.items() if k in group and v}
             if Present.PRESENT in status_set:
                 present = Present.PRESENT
+                per_group_count = per_group_count + 1 if per_group_count else 1
             elif Present.NOT_PRESENT in status_set:
                 present = Present.NOT_PRESENT
+                per_group_count = per_group_count + 0 if per_group_count else 0
             else:
                 present = None
             data[f'{group_name}_cat'] = pd.Series([present.name if present else None], copy=True, dtype=Present.dtype())
             data[f'{group_name}_val'] = pd.Series([present.value if present else None], copy=True, dtype='Int64')
 
-        data['total_grave_goods'] = pd.Series([self.total], copy=True, dtype='Int64')
+        data['total_grave_goods'] = pd.Series([self.grave_goods_total], copy=True, dtype='Int64')
+        data['total_grave_goods_indicator'] = pd.Series([per_group_count], copy=True, dtype='Int64')
 
         return pd.DataFrame.from_dict(data).set_index('id')
 
