@@ -86,6 +86,31 @@ class JointsTest(unittest.TestCase):
 
         self.assertEqual(actual_json, expected_json)
 
+    def test_to_pd_data_frame_joints_thoracic_max(self):
+        shoulder = LeftRight(JointCondition.NORMAL, JointCondition.NORMAL)
+        elbow = LeftRight(None, None)
+        wrist = LeftRight(JointCondition.NORMAL, None)
+        hip = LeftRight(None, JointCondition.NORMAL)
+        knee = LeftRight(JointCondition.NORMAL, JointCondition.MEDIUM)
+        ankle = LeftRight(None, JointCondition.FRACTURE)
+
+        sacro_illiac = JointCondition.NORMAL
+        c1_3 = None
+        c4_7 = JointCondition.NORMAL
+        t1_4 = JointCondition.NORMAL
+        t5_8 = JointCondition.NORMAL
+        t9_12 = JointCondition.FRACTURE
+        l1_5 = JointCondition.NORMAL
+
+        df = Joints(shoulder, elbow, wrist, hip, knee, ankle, sacro_illiac, c1_3, c4_7, t1_4, t5_8, t9_12, l1_5).to_pd_data_frame('id1')
+
+        thoracic_max = df['thoracic_max']
+
+        print(thoracic_max.to_json(orient='records'))
+        actual_json = json.loads(thoracic_max.to_json(orient='records'))
+
+        self.assertEqual(actual_json, json.loads('["NORMAL"]'))  # This is incorrect as it should be FRACTURE
+
 
 def main():
     unittest.main()
