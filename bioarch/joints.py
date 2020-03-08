@@ -87,6 +87,13 @@ class JointCondition(Enum):
         return CategoricalDtype(categories=[s.name for s in JointCondition], ordered=True)
 
 
+JOINTS_SUMMARY_STATS = {
+    'cervical': set(['c1_3', 'c4_7']),
+    'thoracic': set(['t1_4', 't5_8', 't9_12']),
+    'lumbar': set(['l1_5']),
+}
+
+
 class Joints(object):  # pylint: disable=R0902
     """docstring for Joints"""
     def __init__(self, shoulder: LeftRight[JointCondition], elbow: LeftRight[JointCondition], wrist: LeftRight[JointCondition], hip: LeftRight[JointCondition], knee: LeftRight[JointCondition], ankle: LeftRight[JointCondition], sacro_illiac: JointCondition, c1_3: JointCondition, c4_7: JointCondition, t1_4: JointCondition, t5_8: JointCondition, t9_12: JointCondition, l1_5: JointCondition):
@@ -111,34 +118,28 @@ class Joints(object):  # pylint: disable=R0902
         return Joints(*args)
 
     def to_pd_data_frame(self, index):
-        per_joint = {
+        data = {
             'id': pd.Series([index]),
         }
         for key, value in self.__dict__.items():
             if isinstance(value, LeftRight):
-                per_joint[f'{key}_left'] = pd.Series([value.left.name if value.left else None], copy=True, dtype=JointCondition.dtype())
-                per_joint[f'{key}_right'] = pd.Series([value.right.name if value.right else None], copy=True, dtype=JointCondition.dtype())
+                data[f'{key}_left'] = pd.Series([value.left.name if value.left else None], copy=True, dtype=JointCondition.dtype())
+                data[f'{key}_right'] = pd.Series([value.right.name if value.right else None], copy=True, dtype=JointCondition.dtype())
                 avg = value.avg()
-                per_joint[f'{key}_avg'] = pd.Series([avg.name if avg else None], copy=True, dtype=JointCondition.dtype())
+                data[f'{key}_avg'] = pd.Series([avg.name if avg else None], copy=True, dtype=JointCondition.dtype())
             else:
-                per_joint[f'{key}'] = pd.Series([value.name if value else None], copy=True, dtype=JointCondition.dtype())
-        per_joint_df = pd.DataFrame.from_dict(per_joint).set_index('id')
+                data[f'{key}'] = pd.Series([value.name if value else None], copy=True, dtype=JointCondition.dtype())
 
-        summary_stats = {
-            'all': [c for c in per_joint_df.columns if not c.endswith('_avg') and c != 'id'],
-            'cervical': ['c1_3', 'c4_7'],
-            'thoracic': ['t1_4', 't5_8', 't9_12'],
-            'lumbar': ['l1_5'],
-        }
+        for prefix, cols in JOINTS_SUMMARY_STATS.items():
+            subset = [value for key, value in self.__dict__.items() if key in cols and value is not None]
+            min_val = min(subset) if subset else None
+            max_val = max(subset) if subset else None
+            count = len(subset)
+            data[f'{prefix}_min'] = pd.Series([min_val.name if min_val else None], copy=True, dtype=JointCondition.dtype())
+            data[f'{prefix}_max'] = pd.Series([max_val.name if max_val else None], copy=True, dtype=JointCondition.dtype())
+            data[f'{prefix}_count'] = pd.Series([count], copy=True)
 
-        for prefix, cols in summary_stats.items():
-            subset_df = per_joint_df[cols]
-            per_joint_df[f'{prefix}_mean'] = subset_df.mean(axis=1).astype(JointCondition.dtype())
-            per_joint_df[f'{prefix}_max'] = subset_df.max(axis=1).astype(JointCondition.dtype())
-            per_joint_df[f'{prefix}_min'] = subset_df.min(axis=1).astype(JointCondition.dtype())
-            per_joint_df[f'{prefix}_count'] = subset_df.count(axis=1)
-
-        return per_joint_df
+        return pd.DataFrame.from_dict(data).set_index('id')
 
 
 if __name__ == "__main__":
