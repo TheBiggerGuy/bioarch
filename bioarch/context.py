@@ -115,7 +115,7 @@ class Present(Enum):
 @enum.unique
 class BodyPosition(Enum):
     SUPINE              = 0  # noqa: E221
-    SUPINE_FIXED_LEGS   = 1  # noqa: E221
+    SUPINE_FLEXED_LEGS  = 1  # noqa: E221
     CROUCHED            = 2  # noqa: E221
     CROUCHED_LEFT_SIDE  = 3  # noqa: E221
     CROUCHED_RIGHT_SIDE = 4

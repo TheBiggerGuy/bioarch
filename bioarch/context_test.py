@@ -16,7 +16,7 @@ class BodyPositionTest(unittest.TestCase):
         self.assertEqual(BodyPosition.parse('supine'), BodyPosition.SUPINE)
 
         self.assertEqual(BodyPosition.parse(0), BodyPosition.SUPINE)
-        self.assertEqual(BodyPosition.parse(1), BodyPosition.SUPINE_FIXED_LEGS)
+        self.assertEqual(BodyPosition.parse(1), BodyPosition.SUPINE_FLEXED_LEGS)
         self.assertEqual(BodyPosition.parse(2), BodyPosition.CROUCHED)
         self.assertEqual(BodyPosition.parse(3), BodyPosition.CROUCHED_LEFT_SIDE)
         self.assertEqual(BodyPosition.parse(4), BodyPosition.CROUCHED_RIGHT_SIDE)
