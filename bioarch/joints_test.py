@@ -22,9 +22,9 @@ class JointConditionTest(unittest.TestCase):
         self.assertEqual(JointCondition.parse('0'), JointCondition.NORMAL)
         self.assertEqual(JointCondition.parse('1'), JointCondition.MILD)
         self.assertEqual(JointCondition.parse('2'), JointCondition.MEDIUM)
-        self.assertEqual(JointCondition.parse('3'), JointCondition.EXTREAM)
+        self.assertEqual(JointCondition.parse('3'), JointCondition.EXTREME)
         self.assertEqual(JointCondition.parse('4'), JointCondition.FUSED)
-        self.assertEqual(JointCondition.parse('5'), JointCondition.SCHMORALS_NODES)
+        self.assertEqual(JointCondition.parse('5'), JointCondition.SCHMORL_NODES)
         self.assertEqual(JointCondition.parse('6'), JointCondition.FRACTURE)
 
         self.assertEqual(JointCondition.parse(0), JointCondition.NORMAL)
@@ -44,7 +44,7 @@ class JointConditionTest(unittest.TestCase):
         self.assertEqual(JointCondition.avg(va2, va1), None)
 
         va1 = JointCondition.MILD
-        va2 = JointCondition.EXTREAM
+        va2 = JointCondition.EXTREME
         self.assertEqual(JointCondition.avg(va1, va2), JointCondition.MEDIUM)
         self.assertEqual(JointCondition.avg(va2, va1), JointCondition.MEDIUM)
 
@@ -70,7 +70,7 @@ class JointsTest(unittest.TestCase):
 
         sacro_illiac = JointCondition.NORMAL
         c1_3 = None
-        c4_7 = JointCondition.EXTREAM
+        c4_7 = JointCondition.EXTREME
         t1_4 = JointCondition.NORMAL
         t5_8 = None
         t9_12 = JointCondition.FRACTURE
@@ -97,7 +97,7 @@ class JointsTest(unittest.TestCase):
 
         sacro_illiac = JointCondition.NORMAL
         c1_3 = None
-        c4_7 = JointCondition.EXTREAM
+        c4_7 = JointCondition.EXTREME
 
         t1_4 = JointCondition.NORMAL
         t5_8 = None

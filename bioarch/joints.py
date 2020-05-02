@@ -26,15 +26,15 @@ class JointCondition(Enum):
     2 - medium
     3 - extreme
     4 - fused
-    5 - SCHMORALS NODES
+    5 - SCHMORL NODES
     6 - FRACTURE
     """
     NORMAL          =  0  # noqa: E221,E222
     MILD            =  1  # noqa: E221,E222
     MEDIUM          =  2  # noqa: E221,E222
-    EXTREAM         =  3  # noqa: E221,E222
+    EXTREME         =  3  # noqa: E221,E222
     FUSED           =  4  # noqa: E221,E222
-    SCHMORALS_NODES =  5  # noqa: E221,E222
+    SCHMORL_NODES   =  5  # noqa: E221,E222
     FRACTURE        =  6  # noqa: E221,E222
 
     @staticmethod
